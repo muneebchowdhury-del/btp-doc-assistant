@@ -1,0 +1,49 @@
+QUERY_ID,QUESTION,EXPECTED_SUPPORTED,EXPECTED_DOCUMENT_ID,CATEGORY
+CAL001,What are the main technology areas included in SAP Business Technology Platform?,1,DOC017,supported_platform_overview
+CAL002,How does SAP BTP support extending SAP applications and connecting business processes?,1,DOC017,supported_platform_overview
+CAL003,Which core platform building blocks should I understand before using SAP BTP accounts and runtimes?,1,DOC018,supported_basic_concepts
+CAL004,How does SAP BTP combine multiple cloud infrastructures runtimes and regions?,1,DOC018,supported_basic_concepts
+CAL005,What is the relationship between global accounts directories and subaccounts?,1,DOC019,supported_account_model
+CAL006,Where are applications services and subscriptions organized inside the SAP BTP account hierarchy?,1,DOC019,supported_account_model
+CAL007,How do entitlements determine which service plans a subaccount can use?,1,DOC020,supported_entitlements_quotas
+CAL008,What role do quotas play when distributing SAP BTP resources to subaccounts?,1,DOC020,supported_entitlements_quotas
+CAL009,Why does the selected SAP BTP region matter for hosted applications and services?,1,DOC021,supported_regions
+CAL010,What does SAP mean by a region when describing where platform resources are hosted?,1,DOC021,supported_regions
+CAL011,Which SAP BTP tools can administrators and developers use to manage platform resources?,1,DOC022,supported_tools
+CAL012,What options does SAP BTP provide besides the cockpit for working with applications and services?,1,DOC022,supported_tools
+CAL013,How are trial accounts positioned compared with free tier options in SAP BTP?,1,DOC023,supported_trial_free_tier
+CAL014,What should I know before deciding whether to explore SAP BTP through trial or free tier access?,1,DOC023,supported_trial_free_tier
+CAL015,What onboarding resources does SAP BTP suggest after someone learns the basic concepts?,1,DOC024,supported_getting_started
+CAL016,How can a newcomer find guided first steps for SAP BTP environments?,1,DOC024,supported_getting_started
+CAL017,What distinguishes the Cloud Foundry environment from the broader SAP BTP platform?,1,DOC001,supported_cloud_foundry_concepts
+CAL018,What should I know about runtimes when planning a Cloud Foundry application on SAP BTP?,1,DOC001,supported_cloud_foundry_concepts
+CAL019,What development workflow does SAP describe for building applications in Cloud Foundry?,1,DOC002,supported_cloud_foundry_development
+CAL020,How can developers prepare and structure work for applications running in the Cloud Foundry environment?,1,DOC002,supported_cloud_foundry_development
+CAL021,What happens when an application is pushed to the Cloud Foundry environment?,1,DOC003,supported_deployment
+CAL022,Which deployment-related concepts should I review before releasing an app to SAP BTP Cloud Foundry?,1,DOC003,supported_deployment
+CAL023,How do Cloud Foundry applications consume backing services on SAP BTP?,1,DOC004,supported_services
+CAL024,What is the role of service instances when an application needs platform capabilities?,1,DOC004,supported_services
+CAL025,What does binding do between an application and a service instance?,1,DOC005,supported_service_bindings
+CAL026,How are service binding details made available to an application at runtime?,1,DOC005,supported_service_bindings
+CAL027,How can application configuration values be supplied through the Cloud Foundry environment?,1,DOC006,supported_environment_variables
+CAL028,What should I use when I need to change runtime settings without modifying application code?,1,DOC006,supported_environment_variables
+CAL029,What must exist before traffic can reach a Cloud Foundry application route?,1,DOC007,supported_routes
+CAL030,How are hostnames domains and routes connected for Cloud Foundry applications?,1,DOC007,supported_routes
+CAL031,How do route destinations affect where requests are sent for an application?,1,DOC016,supported_routes_destinations
+CAL032,When would application routes and destinations be considered together in SAP BTP?,1,DOC016,supported_routes_destinations
+CAL033,How do I configure SAP Build Work Zone page layouts and widgets?,0,,unsupported_near_domain
+CAL034,Which SAP Integration Suite adapter should I use for IDoc message processing?,0,,unsupported_near_domain
+CAL035,How do I model a CAP entity with CDS annotations for Fiori Elements?,0,,unsupported_near_domain
+CAL036,What are the steps to create an SAP HANA calculation view in Business Application Studio?,0,,unsupported_near_domain
+CAL037,How can I configure principal propagation through SAP Cloud Connector?,0,,unsupported_near_domain
+CAL038,What pricing metric applies to SAP Datasphere capacity units?,0,,unsupported_near_domain
+CAL039,How do I set up event mesh queues and subscriptions for asynchronous messaging?,0,,unsupported_near_domain
+CAL040,Which Kyma service binding secret format should my Kubernetes workload expect?,0,,unsupported_near_domain
+CAL041,What is the best recipe for baking sourdough bread?,0,,unsupported_out_of_scope
+CAL042,How do I repair a leaking bicycle hydraulic brake line?,0,,unsupported_out_of_scope
+CAL043,What are the visa requirements for a tourist trip to Japan?,0,,unsupported_out_of_scope
+CAL044,Can you summarize the plot of Hamlet act by act?,0,,unsupported_out_of_scope
+CAL045,How should I train for a marathon if I only run twice a week?,0,,unsupported_out_of_scope
+CAL046,What is the difference between a mortgage refinance and a home equity loan?,0,,unsupported_out_of_scope
+CAL047,How do I remove mildew stains from bathroom grout?,0,,unsupported_out_of_scope
+CAL048,Which camera settings should I use for night sky photography?,0,,unsupported_out_of_scope

@@ -10,6 +10,18 @@ Development branch:
 
 ## Development Entries
 
+### Task 3: Retrieval optimization pre-registration and calibration set
+
+Changed:
+- Added `data/retrieval_calibration_v2.csv` with 48 fresh development/calibration questions: 32 supported questions and 16 unsupported questions.
+- Added `docs/V2_RETRIEVAL_OPTIMIZATION_PROTOCOL.md` to document the separation between frozen test evidence, calibration data, and future held-out RAG evaluation.
+- Added `scripts/evaluate_retrieval_calibration_v2.py` to evaluate the existing vector-only baseline against `DOCUMENT_CHUNKS_V2` and record retrieval signals for calibration.
+
+Why:
+- Retrieval and abstention parameters need a development set that is separate from frozen V1/V2 test evidence.
+- Unsupported calibration questions need retrieval signals before any abstention threshold is selected.
+- Baseline calibration must be captured before introducing reranking, hybrid retrieval, LLM generation, or RAG behavior.
+
 ### Task 2: V2 retrieval evaluation pre-registration
 
 Changed:
