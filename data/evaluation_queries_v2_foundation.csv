@@ -1,0 +1,17 @@
+QUERY_ID,QUESTION,EXPECTED_DOCUMENT_ID
+V2F001,What is SAP BTP and what technology areas does it bring together?,DOC017
+V2F002,How does SAP BTP help teams build extend integrate and use data?,DOC017
+V2F003,What basic concepts should I understand before working with SAP BTP?,DOC018
+V2F004,How do runtimes regions accounts entitlements and quotas fit together in SAP BTP?,DOC018
+V2F005,How are global accounts subaccounts and directories related in SAP BTP?,DOC019
+V2F006,Where do I deploy applications and manage services within the SAP BTP account structure?,DOC019
+V2F007,What is the difference between an entitlement and a quota in SAP BTP?,DOC020
+V2F008,How are service plans assigned and consumed across global accounts and subaccounts?,DOC020
+V2F009,What does a region mean for applications and services on SAP BTP?,DOC021
+V2F010,How should I think about choosing where my SAP BTP subaccount runs?,DOC021
+V2F011,Which tools are available to develop and manage applications on SAP BTP?,DOC022
+V2F012,What command line and cockpit tools can I use to administer SAP BTP resources?,DOC022
+V2F013,When should I use a trial account instead of free tier service plans?,DOC023
+V2F014,What are the main limits and intended uses of SAP BTP trial accounts?,DOC023
+V2F015,Where should a new user start after learning the basic SAP BTP concepts?,DOC024
+V2F016,What getting started paths are available for SAP BTP environments?,DOC024
