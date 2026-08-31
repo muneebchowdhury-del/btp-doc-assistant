@@ -1,0 +1,49 @@
+QUERY_ID,QUESTION,EXPECTED_SUPPORTED,EXPECTED_DOCUMENT_ID,CATEGORY
+CAL001,Can my team run Java and Node.js applications on SAP BTP Cloud Foundry or is the environment limited to SAP specific runtimes?,1,DOC001,supported_cloud_foundry_concepts
+CAL002,We are starting a new Cloud Foundry app and need to choose development tools before deployment. What workflow should we follow?,1,DOC002,supported_cloud_foundry_development
+CAL003,I have an application package ready and need to get it running in SAP BTP Cloud Foundry. What deployment process applies?,1,DOC003,supported_deployment
+CAL004,My application needs persistence from a managed backing service. How do I discover and create the service it should use?,1,DOC004,supported_services
+CAL005,I already created a database service instance. How do I make its connection information available to my application?,1,DOC005,supported_service_bindings
+CAL006,I need to change a feature flag and API endpoint without rebuilding my Cloud Foundry app. Where should those values be managed?,1,DOC006,supported_environment_variables
+CAL007,Users cannot reach my newly deployed app from the browser yet. What do I need to create so HTTP traffic has an address?,1,DOC007,supported_routes
+CAL008,Our org has several teams and we need separate areas for development and testing. How should we manage Cloud Foundry spaces?,1,DOC009,supported_spaces
+CAL009,A developer can push apps but should not administer the whole Cloud Foundry org. Which role model should I review?,1,DOC010,supported_roles
+CAL010,My app starts and then fails during startup. Where can I inspect the runtime output written by the app and platform?,1,DOC011,supported_application_logs
+CAL011,I need to audit when an app was stopped restaged or crashed rather than read its stdout. Where is that lifecycle history kept?,1,DOC012,supported_application_events
+CAL012,An external automation needs credentials for a service instance without binding it to an app. What should I create?,1,DOC013,supported_service_keys
+CAL013,One space should have stricter memory and instance limits than another. Which quota configuration controls that?,1,DOC014,supported_space_quotas
+CAL014,Our app needs outbound network access but the security team wants to restrict destinations by rules. What Cloud Foundry feature applies?,1,DOC015,supported_security_groups
+CAL015,My app must forward certain incoming paths to a destination based backend service. How should routes and destinations be modeled?,1,DOC016,supported_routes_destinations
+CAL016,I need a concise explanation of what SAP BTP offers across development integration data analytics automation and AI. What is the platform scope?,1,DOC017,supported_platform_overview
+CAL017,I keep seeing subaccounts regions environments entitlements and quotas together. How do these basic SAP BTP concepts fit?,1,DOC018,supported_basic_concepts
+CAL018,Our company wants to separate global administration from deployable work areas. How should global accounts directories and subaccounts be used?,1,DOC019,supported_account_model
+CAL019,A service tile appears in the cockpit but our subaccount still cannot create the selected plan. What entitlement or quota issue might explain this?,1,DOC020,supported_entitlements_quotas
+CAL020,We need to decide where a new subaccount should run for latency and data residency reasons. What does SAP BTP mean by region?,1,DOC021,supported_regions
+CAL021,I want to manage SAP BTP from the cockpit for some tasks and a command line for others. What tool options are available?,1,DOC022,supported_tools
+CAL022,I am evaluating SAP BTP without committing to paid usage yet. How should I think about trial accounts versus free tier plans?,1,DOC023,supported_trial_free_tier
+CAL023,I am new to SAP BTP and want guided first steps instead of a deep reference page. Where should I start?,1,DOC024,supported_getting_started
+CAL024,My app team says they need a service from the marketplace but operations says no binding exists yet. What is the difference between using a service and binding it?,1,DOC004,supported_services_confusable
+CAL025,The service instance already exists and now the application needs credentials injected at runtime. Which step connects them?,1,DOC005,supported_service_bindings_confusable
+CAL026,A CI pipeline needs to call a backing service directly but there is no application process to bind. What credential artifact fits this case?,1,DOC013,supported_service_keys_confusable
+CAL027,I reserved a hostname and domain but the app still needs traffic mapped correctly. Which route administration task should I check?,1,DOC007,supported_routes_confusable
+CAL028,Some requests entering my app should be sent onward to another system through destination configuration. Which route and destination topic covers this?,1,DOC016,supported_routes_destinations_confusable
+CAL029,The app printed an exception during startup and I need the actual emitted messages. Should I inspect logs or events?,1,DOC011,supported_monitoring_confusable
+CAL030,I need to know who changed the state of an application and when the platform recorded the action. Should I inspect events or logs?,1,DOC012,supported_monitoring_confusable
+CAL031,We need isolated development and QA areas under the same Cloud Foundry org but are not changing commercial entitlements. What should we create or manage?,1,DOC009,supported_account_quota_confusable
+CAL032,A subaccount has entitlement to a service but one Cloud Foundry space must be prevented from consuming too many resources. What quota layer applies?,1,DOC014,supported_account_quota_confusable
+CAL033,How do I configure SAP Build Work Zone page layouts and widgets?,0,,unsupported_near_domain
+CAL034,Which SAP Integration Suite adapter should I use for IDoc message processing?,0,,unsupported_near_domain
+CAL035,How do I model a CAP entity with CDS annotations for Fiori Elements?,0,,unsupported_near_domain
+CAL036,What are the steps to create an SAP HANA calculation view in Business Application Studio?,0,,unsupported_near_domain
+CAL037,How can I configure principal propagation through SAP Cloud Connector?,0,,unsupported_near_domain
+CAL038,What pricing metric applies to SAP Datasphere capacity units?,0,,unsupported_near_domain
+CAL039,How do I set up event mesh queues and subscriptions for asynchronous messaging?,0,,unsupported_near_domain
+CAL040,Which Kyma service binding secret format should my Kubernetes workload expect?,0,,unsupported_near_domain
+CAL041,What is the best recipe for baking sourdough bread?,0,,unsupported_out_of_scope
+CAL042,How do I repair a leaking bicycle hydraulic brake line?,0,,unsupported_out_of_scope
+CAL043,What are the visa requirements for a tourist trip to Japan?,0,,unsupported_out_of_scope
+CAL044,Can you summarize the plot of Hamlet act by act?,0,,unsupported_out_of_scope
+CAL045,How should I train for a marathon if I only run twice a week?,0,,unsupported_out_of_scope
+CAL046,What is the difference between a mortgage refinance and a home equity loan?,0,,unsupported_out_of_scope
+CAL047,How do I remove mildew stains from bathroom grout?,0,,unsupported_out_of_scope
+CAL048,Which camera settings should I use for night sky photography?,0,,unsupported_out_of_scope
