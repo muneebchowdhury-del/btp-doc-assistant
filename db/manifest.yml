@@ -1,0 +1,11 @@
+applications:
+  - name: btp-doc-assistant-db-deployer
+    path: .
+    memory: 256M
+    disk_quota: 512M
+    instances: 0
+    buildpacks:
+      - nodejs_buildpack
+    no-route: true
+    services:
+      - btp-doc-assistant-hdi

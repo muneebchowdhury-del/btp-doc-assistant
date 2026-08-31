@@ -1,0 +1,31 @@
+QUERY_ID,QUESTION,EXPECTED_DOCUMENT_ID
+Q001,How do I bind an application to an existing service instance?,DOC005
+Q002,How can I connect a Cloud Foundry application with a BTP service?,DOC005
+Q003,Where can I find the credentials provided by a service binding?,DOC005
+Q004,How do I create a service key for a service instance?,DOC013
+Q005,What is a service key used for in SAP BTP?,DOC013
+Q006,How can I view logs from my Cloud Foundry application?,DOC011
+Q007,Where can I check why my application crashed?,DOC011
+Q008,How can I see events related to an application?,DOC012
+Q009,Where can I check recent application lifecycle events?,DOC012
+Q010,How do I create or manage spaces in Cloud Foundry?,DOC009
+Q011,What is a Cloud Foundry space used for?,DOC009
+Q012,Which roles are available in the Cloud Foundry environment?,DOC010
+Q013,What permissions do Cloud Foundry roles provide?,DOC010
+Q014,How do I configure environment variables for my application?,DOC006
+Q015,Where can I manage application environment variables?,DOC006
+Q016,How do I create a route for a Cloud Foundry application?,DOC007
+Q017,How are routes assigned to applications?,DOC007
+Q018,How can I restrict network traffic using security groups?,DOC015
+Q019,How do security groups work in Cloud Foundry?,DOC015
+Q020,How do I manage quota limits for a Cloud Foundry space?,DOC014
+Q021,What controls how many resources a space can consume?,DOC014
+Q022,How do I deploy an application to the Cloud Foundry environment?,DOC003
+Q023,What is the process for pushing an application to Cloud Foundry?,DOC003
+Q024,What services can applications use in the Cloud Foundry environment?,DOC004
+Q025,How does an application consume services in SAP BTP?,DOC004
+Q026,What programming languages and runtimes are supported by Cloud Foundry?,DOC001
+Q027,What is the SAP BTP Cloud Foundry environment?,DOC001
+Q028,How can developers build applications in the Cloud Foundry environment?,DOC002
+Q029,What development options are available in SAP BTP Cloud Foundry?,DOC002
+Q030,How do application routes and destinations work together?,DOC016

@@ -1,0 +1,12 @@
+{
+  "name": "btp-doc-assistant-db",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@sap/hana-client": "^2.29.27",
+    "@sap/hdi-deploy": "^5"
+  },
+  "scripts": {
+    "start": "node node_modules/@sap/hdi-deploy/"
+  }
+}

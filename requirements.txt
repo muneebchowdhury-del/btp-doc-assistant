@@ -1,0 +1,6 @@
+Flask
+gunicorn
+hdbcli
+fastembed
+requests
+beautifulsoup4
