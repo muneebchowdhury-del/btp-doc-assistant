@@ -1,36 +1,36 @@
 QUERY_ID,QUESTION,EXPECTED_SUPPORTED,EXPECTED_DOCUMENT_ID,CATEGORY
-CAL001,Which source supports describing SAP BTP as a portfolio that spans application development automation integration data analytics and AI?,1,DOC017,supported_platform_overview
-CAL002,Where would a product owner look for the high level value proposition of SAP Business Technology Platform before comparing individual services?,1,DOC017,supported_platform_overview
-CAL003,Which documentation explains the platform vocabulary needed to reason about accounts commercial models environments and regions together?,1,DOC018,supported_basic_concepts
-CAL004,Where can I find the conceptual map that separates environments from infrastructure providers and commercial account constructs?,1,DOC018,supported_basic_concepts
-CAL005,Which account level would help a central team subdivide administration without directly hosting workloads?,1,DOC019,supported_account_model
-CAL006,Where is the hierarchy described for assigning responsibility from a commercial contract down to deployable subaccount units?,1,DOC019,supported_account_model
-CAL007,Which documentation explains why a visible service plan might still be unavailable until capacity is assigned?,1,DOC020,supported_entitlements_quotas
-CAL008,Where should I check the distinction between being allowed to use a service and the amount of that service that is allocated?,1,DOC020,supported_entitlements_quotas
-CAL009,Which source explains the location choice that determines the data center area used by SAP BTP resources?,1,DOC021,supported_regions
-CAL010,Where can I verify how SAP groups availability by geographic hosting location rather than by account name?,1,DOC021,supported_regions
-CAL011,Which documentation lists the management surfaces a team can use across graphical command line and IDE based SAP BTP work?,1,DOC022,supported_tools
-CAL012,Where should an administrator look to compare cockpit CLI APIs and developer tooling for SAP BTP operations?,1,DOC022,supported_tools
-CAL013,Which source explains the lifecycle and account option constraints for short term trial landscapes versus no cost service plans?,1,DOC023,supported_trial_free_tier
-CAL014,Where can I check whether a no cost SAP BTP option is intended for learning experimentation or later conversion?,1,DOC023,supported_trial_free_tier
-CAL015,Which documentation points a first time user toward guided setup paths after choosing an SAP BTP environment?,1,DOC024,supported_getting_started
-CAL016,Where would I send someone who needs entry paths and tutorials rather than a reference page for a single service?,1,DOC024,supported_getting_started
-CAL017,Which source explains Cloud Foundry as an application runtime environment within SAP BTP rather than as the whole platform?,1,DOC001,supported_cloud_foundry_concepts
-CAL018,Which source describes the Cloud Foundry environment in terms of open technology support and application portability?,1,DOC001,supported_cloud_foundry_concepts
-CAL019,Which documentation helps compare development entry points such as SAP Business Application Studio local IDEs and command line tooling?,1,DOC002,supported_cloud_foundry_development
-CAL020,Where should a team check guidance on preparing source code and descriptors before the deployment phase starts?,1,DOC002,supported_cloud_foundry_development
-CAL021,Which source covers the deployment stage that turns an application archive into a running Cloud Foundry app?,1,DOC003,supported_deployment
-CAL022,Where can I check deployment prerequisites and mechanics after development is complete but before operations begin?,1,DOC003,supported_deployment
-CAL023,Which documentation explains the marketplace based model for adding platform capabilities to Cloud Foundry applications?,1,DOC004,supported_services
-CAL024,Where should I look when deciding whether an app needs a backing service such as persistence messaging or connectivity?,1,DOC004,supported_services
-CAL025,Which source explains the operational step that links an already created service instance to a specific application?,1,DOC005,supported_service_bindings
-CAL026,Where can I confirm how an app receives connection metadata after a service relationship is established?,1,DOC005,supported_service_bindings
-CAL027,Which documentation describes supplying app settings through the platform environment instead of hardcoding them?,1,DOC006,supported_environment_variables
-CAL028,Where should an operator look when adjusting runtime configuration values after an app has already been deployed?,1,DOC006,supported_environment_variables
-CAL029,Which source explains the administrative object that must be reserved before mapping external traffic to an app?,1,DOC007,supported_routes
-CAL030,Where can I learn how Cloud Foundry route creation uses domain and host information before application mapping?,1,DOC007,supported_routes
-CAL031,Which documentation discusses forwarding route based requests to destinations instead of only to the local app process?,1,DOC016,supported_routes_destinations
-CAL032,Where should I investigate the boundary between incoming application routes and outbound destination based connectivity?,1,DOC016,supported_routes_destinations
+CAL001,Can my team run Java and Node.js applications on SAP BTP Cloud Foundry or is the environment limited to SAP specific runtimes?,1,DOC001,supported_cloud_foundry_concepts
+CAL002,We are starting a new Cloud Foundry app and need to choose development tools before deployment. What workflow should we follow?,1,DOC002,supported_cloud_foundry_development
+CAL003,I have an application package ready and need to get it running in SAP BTP Cloud Foundry. What deployment process applies?,1,DOC003,supported_deployment
+CAL004,My application needs persistence from a managed backing service. How do I discover and create the service it should use?,1,DOC004,supported_services
+CAL005,I already created a database service instance. How do I make its connection information available to my application?,1,DOC005,supported_service_bindings
+CAL006,I need to change a feature flag and API endpoint without rebuilding my Cloud Foundry app. Where should those values be managed?,1,DOC006,supported_environment_variables
+CAL007,Users cannot reach my newly deployed app from the browser yet. What do I need to create so HTTP traffic has an address?,1,DOC007,supported_routes
+CAL008,Our org has several teams and we need separate areas for development and testing. How should we manage Cloud Foundry spaces?,1,DOC009,supported_spaces
+CAL009,A developer can push apps but should not administer the whole Cloud Foundry org. Which role model should I review?,1,DOC010,supported_roles
+CAL010,My app starts and then fails during startup. Where can I inspect the runtime output written by the app and platform?,1,DOC011,supported_application_logs
+CAL011,I need to audit when an app was stopped restaged or crashed rather than read its stdout. Where is that lifecycle history kept?,1,DOC012,supported_application_events
+CAL012,An external automation needs credentials for a service instance without binding it to an app. What should I create?,1,DOC013,supported_service_keys
+CAL013,One space should have stricter memory and instance limits than another. Which quota configuration controls that?,1,DOC014,supported_space_quotas
+CAL014,Our app needs outbound network access but the security team wants to restrict destinations by rules. What Cloud Foundry feature applies?,1,DOC015,supported_security_groups
+CAL015,My app must forward certain incoming paths to a destination based backend service. How should routes and destinations be modeled?,1,DOC016,supported_routes_destinations
+CAL016,I need a concise explanation of what SAP BTP offers across development integration data analytics automation and AI. What is the platform scope?,1,DOC017,supported_platform_overview
+CAL017,I keep seeing subaccounts regions environments entitlements and quotas together. How do these basic SAP BTP concepts fit?,1,DOC018,supported_basic_concepts
+CAL018,Our company wants to separate global administration from deployable work areas. How should global accounts directories and subaccounts be used?,1,DOC019,supported_account_model
+CAL019,A service tile appears in the cockpit but our subaccount still cannot create the selected plan. What entitlement or quota issue might explain this?,1,DOC020,supported_entitlements_quotas
+CAL020,We need to decide where a new subaccount should run for latency and data residency reasons. What does SAP BTP mean by region?,1,DOC021,supported_regions
+CAL021,I want to manage SAP BTP from the cockpit for some tasks and a command line for others. What tool options are available?,1,DOC022,supported_tools
+CAL022,I am evaluating SAP BTP without committing to paid usage yet. How should I think about trial accounts versus free tier plans?,1,DOC023,supported_trial_free_tier
+CAL023,I am new to SAP BTP and want guided first steps instead of a deep reference page. Where should I start?,1,DOC024,supported_getting_started
+CAL024,My app team says they need a service from the marketplace but operations says no binding exists yet. What is the difference between using a service and binding it?,1,DOC004,supported_services_confusable
+CAL025,The service instance already exists and now the application needs credentials injected at runtime. Which step connects them?,1,DOC005,supported_service_bindings_confusable
+CAL026,A CI pipeline needs to call a backing service directly but there is no application process to bind. What credential artifact fits this case?,1,DOC013,supported_service_keys_confusable
+CAL027,I reserved a hostname and domain but the app still needs traffic mapped correctly. Which route administration task should I check?,1,DOC007,supported_routes_confusable
+CAL028,Some requests entering my app should be sent onward to another system through destination configuration. Which route and destination topic covers this?,1,DOC016,supported_routes_destinations_confusable
+CAL029,The app printed an exception during startup and I need the actual emitted messages. Should I inspect logs or events?,1,DOC011,supported_monitoring_confusable
+CAL030,I need to know who changed the state of an application and when the platform recorded the action. Should I inspect events or logs?,1,DOC012,supported_monitoring_confusable
+CAL031,We need isolated development and QA areas under the same Cloud Foundry org but are not changing commercial entitlements. What should we create or manage?,1,DOC009,supported_account_quota_confusable
+CAL032,A subaccount has entitlement to a service but one Cloud Foundry space must be prevented from consuming too many resources. What quota layer applies?,1,DOC014,supported_account_quota_confusable
 CAL033,How do I configure SAP Build Work Zone page layouts and widgets?,0,,unsupported_near_domain
 CAL034,Which SAP Integration Suite adapter should I use for IDoc message processing?,0,,unsupported_near_domain
 CAL035,How do I model a CAP entity with CDS annotations for Fiori Elements?,0,,unsupported_near_domain
