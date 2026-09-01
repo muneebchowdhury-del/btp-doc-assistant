@@ -16,8 +16,6 @@ if PROJECT_ROOT not in sys.path:
 
 from scripts.evaluate_retrieval_variants_v2 import (  # noqa: E402
     CALIBRATION_FILE,
-    DENSE_CANDIDATE_CHUNKS,
-    LEXICAL_CANDIDATE_CHUNKS,
     RRF_K,
     bm25_rank,
     build_bm25_index,
@@ -31,12 +29,7 @@ from scripts.evaluate_retrieval_variants_v2 import (  # noqa: E402
 )
 
 
-HIGH_RANKING_CHUNK_WINDOW = int(
-    os.getenv(
-        "V2_ABSTENTION_HIGH_RANKING_CHUNK_WINDOW",
-        "10"
-    )
-)
+HIGH_RANKING_CHUNK_WINDOW = 10
 
 
 def bool_as_int(value):
@@ -94,18 +87,17 @@ def evaluate_question(item, corpus_chunks, bm25_index):
         item["QUESTION"]
     )
 
-    dense_candidates = dense_chunks[:DENSE_CANDIDATE_CHUNKS]
-    lexical_candidates = bm25_rank(
+    lexical_chunks = bm25_rank(
         item["QUESTION"],
         corpus_chunks,
         bm25_index
-    )[:LEXICAL_CANDIDATE_CHUNKS]
+    )
 
     hybrid_start = time.perf_counter()
     hybrid_chunks = reciprocal_rank_fusion(
         [
-            dense_candidates,
-            lexical_candidates
+            dense_chunks,
+            lexical_chunks
         ],
         RRF_K
     )
@@ -215,6 +207,14 @@ def signal_value(result, signal_name):
 
     return float(
         value
+    )
+
+
+def is_safe_to_answer(result, depth):
+    return (
+        result["EXPECTED_SUPPORTED"] == "1"
+        and result["EXPECTED_RANK"] > 0
+        and result["EXPECTED_RANK"] <= depth
     )
 
 
@@ -417,7 +417,18 @@ def evaluate_rule(rule, results):
     supported_total = len(true_accepts) + len(false_rejects)
     unsupported_total = len(true_abstentions) + len(false_accepts)
 
-    return {
+    top3_metrics = evaluate_safety_target(
+        rule,
+        results,
+        3
+    )
+    top5_metrics = evaluate_safety_target(
+        rule,
+        results,
+        5
+    )
+
+    metrics = {
         "RULE_ID": rule["RULE_ID"],
         "DESCRIPTION": rule["DESCRIPTION"],
         "TRUE_ACCEPTS": len(true_accepts),
@@ -457,6 +468,15 @@ def evaluate_rule(rule, results):
         )
     }
 
+    metrics.update(
+        top3_metrics
+    )
+    metrics.update(
+        top5_metrics
+    )
+
+    return metrics
+
 
 def abstain_rate(rule, results):
     if not results:
@@ -471,6 +491,95 @@ def abstain_rate(rule, results):
     )
 
     return abstained / len(results)
+
+
+def evaluate_safety_target(rule, results, depth):
+    safe_results = [
+        result
+        for result in results
+        if is_safe_to_answer(
+            result,
+            depth
+        )
+    ]
+    accepted_results = [
+        result
+        for result in results
+        if rule["ACCEPT"](
+            result
+        )
+    ]
+
+    safe_accepts = [
+        result
+        for result in accepted_results
+        if is_safe_to_answer(
+            result,
+            depth
+        )
+    ]
+    unsafe_accepts = [
+        result
+        for result in accepted_results
+        if not is_safe_to_answer(
+            result,
+            depth
+        )
+    ]
+    false_rejects = [
+        result
+        for result in safe_results
+        if not rule["ACCEPT"](
+            result
+        )
+    ]
+
+    accepted_total = len(
+        accepted_results
+    )
+    safe_total = len(
+        safe_results
+    )
+    total = len(
+        results
+    )
+
+    prefix = f"TOP{depth}"
+
+    return {
+        f"SAFE_ACCEPTS_{prefix}": len(
+            safe_accepts
+        ),
+        f"UNSAFE_ACCEPTS_{prefix}": len(
+            unsafe_accepts
+        ),
+        f"FALSE_REJECTS_SAFE_{prefix}": len(
+            false_rejects
+        ),
+        f"ACCEPTED_ANSWER_PRECISION_{prefix}": (
+            len(safe_accepts) / accepted_total
+            if accepted_total
+            else 0.0
+        ),
+        f"SAFE_ANSWER_RECALL_{prefix}": (
+            len(safe_accepts) / safe_total
+            if safe_total
+            else 0.0
+        ),
+        f"COVERAGE_{prefix}": (
+            accepted_total / total
+            if total
+            else 0.0
+        ),
+        f"UNSAFE_ACCEPT_QUERY_IDS_{prefix}": ";".join(
+            result["QUERY_ID"]
+            for result in unsafe_accepts
+        ),
+        f"FALSE_REJECT_SAFE_QUERY_IDS_{prefix}": ";".join(
+            result["QUERY_ID"]
+            for result in false_rejects
+        )
+    }
 
 
 def format_float(value, digits=4):
@@ -504,6 +613,8 @@ def print_signal_results(results):
         "HYBRID_TOP1_CORRECT,"
         "HYBRID_TOP3_CORRECT,"
         "HYBRID_TOP5_CORRECT,"
+        "SAFE_TO_ANSWER_TOP3,"
+        "SAFE_TO_ANSWER_TOP5,"
         "EMBEDDING_MS,"
         "DENSE_HANA_MS,"
         "HYBRID_FUSION_MS"
@@ -529,6 +640,8 @@ def print_signal_results(results):
             f"{result['HYBRID_TOP1_CORRECT']},"
             f"{result['HYBRID_TOP3_CORRECT']},"
             f"{result['HYBRID_TOP5_CORRECT']},"
+            f"{bool_as_int(is_safe_to_answer(result, 3))},"
+            f"{bool_as_int(is_safe_to_answer(result, 5))},"
             f"{format_float(result['EMBEDDING_MS'], 2)},"
             f"{format_float(result['DENSE_HANA_MS'], 2)},"
             f"{format_float(result['HYBRID_FUSION_MS'], 2)}"
@@ -553,7 +666,23 @@ def print_rule_results(rule_results):
         "NEAR_DOMAIN_ABSTAIN_RATE,"
         "OUT_OF_SCOPE_ABSTAIN_RATE,"
         "FALSE_ACCEPT_QUERY_IDS,"
-        "FALSE_REJECT_QUERY_IDS"
+        "FALSE_REJECT_QUERY_IDS,"
+        "SAFE_ACCEPTS_TOP3,"
+        "UNSAFE_ACCEPTS_TOP3,"
+        "FALSE_REJECTS_SAFE_TOP3,"
+        "ACCEPTED_ANSWER_PRECISION_TOP3,"
+        "SAFE_ANSWER_RECALL_TOP3,"
+        "COVERAGE_TOP3,"
+        "UNSAFE_ACCEPT_QUERY_IDS_TOP3,"
+        "FALSE_REJECT_SAFE_QUERY_IDS_TOP3,"
+        "SAFE_ACCEPTS_TOP5,"
+        "UNSAFE_ACCEPTS_TOP5,"
+        "FALSE_REJECTS_SAFE_TOP5,"
+        "ACCEPTED_ANSWER_PRECISION_TOP5,"
+        "SAFE_ANSWER_RECALL_TOP5,"
+        "COVERAGE_TOP5,"
+        "UNSAFE_ACCEPT_QUERY_IDS_TOP5,"
+        "FALSE_REJECT_SAFE_QUERY_IDS_TOP5"
     )
 
     for result in rule_results:
@@ -570,7 +699,23 @@ def print_rule_results(rule_results):
             f"{format_float(result['NEAR_DOMAIN_ABSTAIN_RATE'])},"
             f"{format_float(result['OUT_OF_SCOPE_ABSTAIN_RATE'])},"
             f"{result['FALSE_ACCEPT_QUERY_IDS']},"
-            f"{result['FALSE_REJECT_QUERY_IDS']}"
+            f"{result['FALSE_REJECT_QUERY_IDS']},"
+            f"{result['SAFE_ACCEPTS_TOP3']},"
+            f"{result['UNSAFE_ACCEPTS_TOP3']},"
+            f"{result['FALSE_REJECTS_SAFE_TOP3']},"
+            f"{format_float(result['ACCEPTED_ANSWER_PRECISION_TOP3'])},"
+            f"{format_float(result['SAFE_ANSWER_RECALL_TOP3'])},"
+            f"{format_float(result['COVERAGE_TOP3'])},"
+            f"{result['UNSAFE_ACCEPT_QUERY_IDS_TOP3']},"
+            f"{result['FALSE_REJECT_SAFE_QUERY_IDS_TOP3']},"
+            f"{result['SAFE_ACCEPTS_TOP5']},"
+            f"{result['UNSAFE_ACCEPTS_TOP5']},"
+            f"{result['FALSE_REJECTS_SAFE_TOP5']},"
+            f"{format_float(result['ACCEPTED_ANSWER_PRECISION_TOP5'])},"
+            f"{format_float(result['SAFE_ANSWER_RECALL_TOP5'])},"
+            f"{format_float(result['COVERAGE_TOP5'])},"
+            f"{result['UNSAFE_ACCEPT_QUERY_IDS_TOP5']},"
+            f"{result['FALSE_REJECT_SAFE_QUERY_IDS_TOP5']}"
         )
 
 
@@ -579,10 +724,11 @@ def main():
     print("Version 2 Abstention Calibration")
     print("=" * 90)
     print(f"Calibration file: {CALIBRATION_FILE}")
-    print("Selected retrieval: dense + BM25-style lexical + RRF")
+    print(
+        "Selected retrieval: full dense ranking + full "
+        "BM25-style lexical ranking + RRF"
+    )
     print("Reranker: none")
-    print(f"Dense candidate chunks: {DENSE_CANDIDATE_CHUNKS}")
-    print(f"Lexical candidate chunks: {LEXICAL_CANDIDATE_CHUNKS}")
     print(f"RRF k: {RRF_K}")
     print(
         "High-ranking chunk support window: "
