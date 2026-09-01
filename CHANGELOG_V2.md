@@ -15,11 +15,13 @@ Development branch:
 Changed:
 - Added `scripts/evaluate_retrieval_variants_v2.py` to compare dense baseline, hybrid RRF, dense cross-encoder reranking, and hybrid cross-encoder reranking on the 48-query calibration set.
 - Added `docs/V2_RANKING_EXPERIMENT_PROTOCOL.md` to document the four variants, fixed inputs, comparison rules, metrics, and explicit non-goals.
+- Revised the experimental candidate pools to 50 dense chunks and 50 lexical chunks, and added supported-query candidate-recall diagnostics before reranking.
 
 Why:
 - Retrieval ranking changes need a separate experimental harness before any production search behavior changes are considered.
 - Dense, lexical, and reranked variants must be compared against the same pre-registered calibration data while preserving frozen V1/V2 test evidence.
 - Unsupported calibration queries need retrieval signals preserved for later abstention work without selecting a threshold yet.
+- Candidate size is a calibration-time design parameter, and score values from cosine similarity, BM25-style ranking, RRF, and cross-encoder reranking must not be compared numerically across variants.
 
 ### Task 3: Retrieval optimization pre-registration and calibration set
 

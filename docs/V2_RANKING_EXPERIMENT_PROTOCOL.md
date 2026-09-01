@@ -17,6 +17,8 @@ The experiment is calibration-only. The frozen V1/V2 evaluation sets remain held
 
 The experiment harness is read-only to HANA. It must not deploy HDI artifacts, ingest data, update `DOCUMENT_CHUNKS_V2`, or modify `DOCUMENT_CHUNKS`.
 
+Candidate size is a calibration-time design parameter. The first ranking experiment uses 50 dense candidate chunks and 50 lexical candidate chunks so reranking is evaluated with a bounded but reviewable candidate pool. Changing this value later requires a documented calibration decision and must not modify the calibration dataset or frozen test evidence.
+
 ## Variants
 
 ### A: Dense Baseline
@@ -73,9 +75,13 @@ For all 48 questions, including the 16 unsupported questions, the harness preser
 
 Unsupported questions do not receive invented correct documents. Their retrieval signals are recorded only for later abstention calibration.
 
+Cosine similarity scores, Reciprocal Rank Fusion scores, BM25-style lexical scores, and cross-encoder reranking scores are on different scales. They must not be compared numerically across variants. Cross-variant comparison must use ranks, Top-5 document IDs, candidate recall, aggregate metrics, and latency.
+
 ## Comparison Rules
 
 Variant A is the baseline for per-query movement analysis. Variants B, C, and D must report whether each individual calibration question improves, regresses, or remains unchanged relative to the dense baseline expected-document rank.
+
+For supported questions in reranking variants, the harness must report candidate recall before reranking: whether the expected document is present in the candidate pool and which document IDs are represented in that pool. This diagnostic separates candidate-generation failures from reranker-ordering failures.
 
 No variant may be selected as final based on the frozen V1/V2 test evidence. Final retrieval and RAG evaluation will require a separate approved held-out procedure.
 

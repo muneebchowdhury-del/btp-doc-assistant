@@ -38,13 +38,13 @@ TABLE_NAME = "DOCUMENT_CHUNKS_V2"
 DENSE_CANDIDATE_CHUNKS = int(
     os.getenv(
         "V2_DENSE_CANDIDATE_CHUNKS",
-        "200"
+        "50"
     )
 )
 LEXICAL_CANDIDATE_CHUNKS = int(
     os.getenv(
         "V2_LEXICAL_CANDIDATE_CHUNKS",
-        "200"
+        "50"
     )
 )
 RRF_K = int(
@@ -560,6 +560,46 @@ def find_expected_rank(document_ranking, expected_document):
     return None
 
 
+def expected_document_in_candidate_pool(item, chunks):
+    expected_document = item["EXPECTED_DOCUMENT_ID"].strip()
+
+    if (
+        not is_supported(item)
+        or not expected_document
+    ):
+        return ""
+
+    return int(
+        any(
+            chunk.document_id == expected_document
+            for chunk in chunks
+        )
+    )
+
+
+def candidate_pool_documents(item, chunks):
+    if not is_supported(item):
+        return ""
+
+    documents = []
+    seen_documents = set()
+
+    for chunk in chunks:
+        if chunk.document_id in seen_documents:
+            continue
+
+        seen_documents.add(
+            chunk.document_id
+        )
+        documents.append(
+            chunk.document_id
+        )
+
+    return ";".join(
+        documents
+    )
+
+
 def evaluate_variant_result(
     item,
     variant,
@@ -568,7 +608,8 @@ def evaluate_variant_result(
     embedding_ms=0.0,
     dense_hana_ms=0.0,
     lexical_ms=0.0,
-    rerank_ms=0.0
+    rerank_ms=0.0,
+    candidate_chunks=None
 ):
     expected_document = item["EXPECTED_DOCUMENT_ID"].strip()
     expected_rank = find_expected_rank(
@@ -717,6 +758,16 @@ def evaluate_variant_result(
             round(
                 rerank_ms,
                 2
+            ),
+        "CANDIDATE_EXPECTED_PRESENT":
+            expected_document_in_candidate_pool(
+                item,
+                candidate_chunks or []
+            ),
+        "CANDIDATE_POOL_DOCUMENTS":
+            candidate_pool_documents(
+                item,
+                candidate_chunks or []
             )
     }
 
@@ -922,7 +973,9 @@ def print_detailed_results(results):
         "EMBEDDING_MS,"
         "DENSE_HANA_MS,"
         "LEXICAL_MS,"
-        "RERANK_MS"
+        "RERANK_MS,"
+        "CANDIDATE_EXPECTED_PRESENT,"
+        "CANDIDATE_POOL_DOCUMENTS"
     )
 
     for result in results:
@@ -948,7 +1001,9 @@ def print_detailed_results(results):
             f"{result['EMBEDDING_MS']},"
             f"{result['DENSE_HANA_MS']},"
             f"{result['LEXICAL_MS']},"
-            f"{result['RERANK_MS']}"
+            f"{result['RERANK_MS']},"
+            f"{result['CANDIDATE_EXPECTED_PRESENT']},"
+            f"{result['CANDIDATE_POOL_DOCUMENTS']}"
         )
 
 
@@ -980,6 +1035,81 @@ def print_baseline_comparison(results):
             f"{item['RANK_MOVEMENT']},"
             f"{item['BASELINE_TOP5_DOCUMENTS']},"
             f"{item['VARIANT_TOP5_DOCUMENTS']}"
+        )
+
+
+def print_candidate_recall_diagnostics(results):
+    print()
+    print("=" * 90)
+    print("SUPPORTED CANDIDATE RECALL BEFORE RERANKING")
+    print("=" * 90)
+    print(
+        "VARIANT,"
+        "QUERY_ID,"
+        "EXPECTED_DOCUMENT_ID,"
+        "CANDIDATE_EXPECTED_PRESENT,"
+        "CANDIDATE_POOL_DOCUMENTS"
+    )
+
+    reranking_variants = {
+        "C",
+        "D"
+    }
+    diagnostic_results = [
+        result
+        for result in results
+        if (
+            result["VARIANT"] in reranking_variants
+            and result["EXPECTED_SUPPORTED"] == "1"
+        )
+    ]
+
+    for result in diagnostic_results:
+        print(
+            f"{result['VARIANT']},"
+            f"{result['QUERY_ID']},"
+            f"{result['EXPECTED_DOCUMENT_ID']},"
+            f"{result['CANDIDATE_EXPECTED_PRESENT']},"
+            f"{result['CANDIDATE_POOL_DOCUMENTS']}"
+        )
+
+    print()
+    print("CANDIDATE_RECALL_SUMMARY")
+    print(
+        "VARIANT,"
+        "SUPPORTED_TOTAL,"
+        "EXPECTED_PRESENT_COUNT,"
+        "EXPECTED_PRESENT_RATE"
+    )
+
+    for variant in [
+        "C",
+        "D"
+    ]:
+        variant_results = [
+            result
+            for result in diagnostic_results
+            if result["VARIANT"] == variant
+        ]
+        total = len(
+            variant_results
+        )
+        present_count = sum(
+            int(
+                result["CANDIDATE_EXPECTED_PRESENT"]
+            )
+            for result in variant_results
+        )
+        present_rate = (
+            present_count / total
+            if total
+            else 0.0
+        )
+        print(
+            f"{variant},"
+            f"{total},"
+            f"{present_count},"
+            f"{present_rate:.4f}"
         )
 
 
@@ -1093,7 +1223,8 @@ def main():
                 embedding_ms + dense_hana_ms + dense_rerank_ms,
                 embedding_ms=embedding_ms,
                 dense_hana_ms=dense_hana_ms,
-                rerank_ms=dense_rerank_ms
+                rerank_ms=dense_rerank_ms,
+                candidate_chunks=dense_candidate_chunks
             )
         )
 
@@ -1126,7 +1257,8 @@ def main():
                 embedding_ms=embedding_ms,
                 dense_hana_ms=dense_hana_ms,
                 lexical_ms=lexical_ms,
-                rerank_ms=hybrid_rerank_ms
+                rerank_ms=hybrid_rerank_ms,
+                candidate_chunks=hybrid_candidate_chunks
             )
         )
 
@@ -1144,6 +1276,9 @@ def main():
         results
     )
     print_detailed_results(
+        results
+    )
+    print_candidate_recall_diagnostics(
         results
     )
     print_baseline_comparison(
