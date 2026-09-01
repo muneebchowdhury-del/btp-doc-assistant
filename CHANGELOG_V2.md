@@ -10,6 +10,17 @@ Development branch:
 
 ## Development Entries
 
+### Task 4: Retrieval ranking experiment harness
+
+Changed:
+- Added `scripts/evaluate_retrieval_variants_v2.py` to compare dense baseline, hybrid RRF, dense cross-encoder reranking, and hybrid cross-encoder reranking on the 48-query calibration set.
+- Added `docs/V2_RANKING_EXPERIMENT_PROTOCOL.md` to document the four variants, fixed inputs, comparison rules, metrics, and explicit non-goals.
+
+Why:
+- Retrieval ranking changes need a separate experimental harness before any production search behavior changes are considered.
+- Dense, lexical, and reranked variants must be compared against the same pre-registered calibration data while preserving frozen V1/V2 test evidence.
+- Unsupported calibration queries need retrieval signals preserved for later abstention work without selecting a threshold yet.
+
 ### Task 3: Retrieval optimization pre-registration and calibration set
 
 Changed:
