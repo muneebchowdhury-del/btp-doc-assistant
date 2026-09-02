@@ -80,6 +80,8 @@ Generation context construction is deterministic:
 
 This is the fixed RAG context-construction rule. It must not be adjusted by inspecting or reusing final held-out questions.
 
+The deterministic retrieval-to-context bridge is implemented in `rag_context.py` as `build_rag_contexts_from_hybrid_results(hybrid_chunks, limit=5)`. The helper consumes an already-produced full Hybrid RRF chunk ranking and formats provider-neutral context objects; it does not run retrieval, alter RRF, apply abstention, call Gemini, or integrate generation into `app.py`.
+
 ## Top-5 RAG Context Decision
 
 The RAG stage will use Top-5 retrieved unique-document evidence as the generation context depth.
