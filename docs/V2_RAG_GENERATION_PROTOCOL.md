@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This protocol defines the first Version 2 RAG generation boundary after completion of retrieval and abstention research. It prepares a provider-agnostic external LLM interface and grounding contract without making any LLM API call, selecting a concrete external provider, or changing production application behavior.
+This protocol defines the Version 2 RAG generation boundary after completion of retrieval and abstention research. It records the provider-neutral LLM interface, grounding contract, selected external provider, and production boundary for the next reviewed RAG-generation step.
+
+The grounding prompt and evidence contract were originally frozen before any generated-answer quality observations. Since then, isolated synthetic provider connectivity testing has occurred. No RAG answer-quality experiment, final end-to-end generation evaluation, or production `app.py` integration has occurred.
 
 ## SAP-Native Provider Feasibility
 
@@ -29,6 +31,8 @@ This is a RAG-generation design choice. Multiple LLM providers or models will no
 Free-tier input and output tokens are free subject to Google's current Gemini Developer API free-tier quotas. Billing was not enabled for this decision. Free-tier data may be used by Google to improve its products, so only public SAP documentation and non-sensitive research questions may be sent.
 
 After provider connectivity testing, `gemini-3.7-flash` was not retained because repeated authenticated requests returned provider-side `503 UNAVAILABLE` high-demand failures. `gemini-3.6-flash` metadata access succeeded, but a controlled synthetic generation request timed out after 45 seconds with zero response bytes. `gemini-3.5-flash` completed the controlled synthetic connectivity test and is therefore the selected external generation model for the next reviewed RAG-generation step.
+
+Connectivity testing used only synthetic text and did not use frozen retrieval held-out questions.
 
 References checked for this provider boundary:
 
@@ -117,7 +121,7 @@ The context objects passed to the provider must contain at minimum:
 
 ## Grounding And Refusal Contract
 
-The generation prompt is frozen before observing any generated answer.
+The generation prompt and grounding contract were frozen before observing any generated-answer quality results.
 
 The model must:
 
@@ -129,7 +133,7 @@ The model must:
 - avoid inventing URLs, SAP features, configuration steps, commands, or service plans
 - keep answers concise and documentation-oriented
 
-The future generation prompt must instruct the LLM to refuse when supplied evidence does not support the requested answer. This second-stage evidence-sufficiency mechanism is motivated by the held-out finding that the `0.75` dense cosine gate alone did not guarantee retrieval correctness.
+The generation prompt instructs the LLM to refuse when supplied evidence does not support the requested answer. This second-stage evidence-sufficiency mechanism is motivated by the held-out finding that the `0.75` dense cosine gate alone did not guarantee retrieval correctness.
 
 No second numeric evidence-sufficiency threshold is introduced in this phase.
 
@@ -145,7 +149,7 @@ The model must not invent or rewrite source URLs. If no supplied context support
 
 ## Credential And Security Approach
 
-Credentials for any future external LLM provider must come only from environment variables or Cloud Foundry service configuration.
+Credentials for the external LLM provider must come only from environment variables or approved Cloud Foundry service configuration.
 
 The repository must not contain:
 
@@ -157,13 +161,13 @@ The repository must not contain:
 - `VCAP_SERVICES` contents
 - provider credentials
 
-This phase adds no credentials and makes no provider request.
+No credentials are committed. Isolated synthetic provider connectivity testing has occurred, but no RAG answer-quality experiment or final end-to-end evaluation has occurred.
 
 The Gemini adapter reads credentials only from `GEMINI_API_KEY`. The key must never be printed, logged, or committed.
 
-## Isolated LLM Connectivity Test Criteria
+## Isolated LLM Connectivity Test Result
 
-A future isolated LLM connectivity test will be considered successful only if:
+The completed isolated LLM connectivity test was considered successful because:
 
 - the frozen Gemini Developer API provider and `gemini-3.5-flash` model are used
 - credentials are supplied through environment variables or approved Cloud Foundry configuration
@@ -173,7 +177,7 @@ A future isolated LLM connectivity test will be considered successful only if:
 - no production `app.py` behavior is changed
 - no retrieval, abstention, corpus, embedding, or evaluation setting is changed
 
-The connectivity test is only to prove `Python -> Gemini Developer API -> model response`. It is not an answer-quality experiment, prompt-tuning run, RAG evaluation, or production-readiness test.
+The connectivity test proved `Python -> Gemini Developer API -> model response`. It was not an answer-quality experiment, prompt-tuning run, RAG evaluation, or production-readiness test.
 
 ## Evaluation Boundary
 
@@ -185,7 +189,6 @@ Future generated-answer evaluation must be separated from retrieval evaluation a
 
 This phase does not:
 
-- make an LLM request
 - implement RAG in production
 - modify production answer behavior in `app.py`
 - deploy the app

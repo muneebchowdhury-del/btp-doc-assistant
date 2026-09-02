@@ -66,7 +66,7 @@ class LLMProviderTests(unittest.TestCase):
             payload.user
         )
 
-    def test_generate_does_not_call_provider_yet(self):
+    def test_missing_credentials_fail_before_provider_call(self):
         self.assertEqual(
             "gemini-3.5-flash",
             GEMINI_MODEL
