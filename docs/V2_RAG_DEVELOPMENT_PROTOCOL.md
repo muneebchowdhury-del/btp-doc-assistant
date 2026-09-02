@@ -91,6 +91,7 @@ For every development query, the harness will record:
 - question
 - expected supported status
 - expected document
+- pre-registered `REFERENCE_FACT` for offline/manual scoring only
 - dense rank-1 document
 - dense rank-1 cosine score
 - `ACCEPT` / `ABSTAIN` decision
@@ -104,6 +105,8 @@ For every development query, the harness will record:
 - total end-to-end latency
 
 For pipeline abstention, no Gemini call must occur.
+
+`REFERENCE_FACT` must not be used for retrieval, prompting, context selection, Gemini input, gate decisions, or any online pipeline behavior.
 
 ## Outcome Types
 
@@ -125,7 +128,7 @@ Scoring uses simple reproducible fields:
 | Criterion | Score | Definition |
 | --- | --- | --- |
 | Groundedness / faithfulness | `0` or `1` | `1` when factual claims are supported by the supplied retrieved chunks; `0` when unsupported factual claims appear. |
-| Answer correctness | `0` or `1` | For supported questions with sufficient retrieved evidence, `1` when the answer contains the pre-registered `REFERENCE_FACT`; `0` otherwise. |
+| Answer correctness | `0` or `1` | For supported questions with sufficient retrieved evidence, `1` when the answer semantically conveys the pre-registered `REFERENCE_FACT`; `0` otherwise. This is not literal substring or exact-string matching. |
 | Citation correctness | `0` or `1` | `1` when cited document IDs, titles, and URLs are among the supplied contexts and support the associated claim; `0` otherwise. |
 | Unsupported claim / hallucination | `0` or `1` | `1` when unsupported factual SAP claims are introduced; `0` when they are not. Lower is better. |
 | Evidence-based refusal | `0` or `1` | For unsupported or insufficient-evidence cases, `1` when the model refuses instead of inventing an answer; `0` otherwise. |

@@ -1,4 +1,5 @@
 import unittest
+from io import StringIO
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -225,7 +226,106 @@ class RAGDevelopmentHarnessTests(unittest.TestCase):
                 float
             )
 
-    def accepted_result_with_provider(self, provider):
+    def test_main_unpacks_corpus_chunks_before_building_bm25_index(self):
+        corpus_chunks = [
+            chunk(
+                "DOC001",
+                1
+            )
+        ]
+        bm25_index = {
+            "synthetic": 1
+        }
+        result = {
+            "QUERY_ID": "RAGDEVTEST001",
+            "QUESTION": "Synthetic development question?",
+            "EXPECTED_SUPPORTED": "1",
+            "EXPECTED_DOCUMENT_ID": "DOC001",
+            "CATEGORY": "SUPPORTED",
+            "REFERENCE_FACT": "Synthetic reference fact.",
+            "DENSE_RANK1_DOCUMENT_ID": "DOC001",
+            "DENSE_RANK1_SCORE": 0.80,
+            "ACCEPT_DECISION": "ACCEPT",
+            "HYBRID_TOP5_DOCUMENTS": "DOC001",
+            "CONTEXT_DOCUMENT_IDS": "DOC001",
+            "CONTEXTS": [],
+            "GEMINI_CALLED": True,
+            "OUTCOME": "GENERATED_ANSWER",
+            "GEMINI_ANSWER_OR_REFUSAL": "Synthetic answer.",
+            "PROVIDER_ERROR": "",
+            "EMBEDDING_MS": 1.0,
+            "DENSE_HANA_MS": 2.0,
+            "LEXICAL_MS": 3.0,
+            "HYBRID_FUSION_MS": 4.0,
+            "RETRIEVAL_MS": 10.0,
+            "GENERATION_MS": 5.0,
+            "TOTAL_END_TO_END_MS": 15.0
+        }
+
+        with patch.object(
+            harness,
+            "load_development_queries",
+            return_value=[
+                item()
+            ]
+        ), patch.object(
+            harness,
+            "fetch_corpus_chunks",
+            return_value=(
+                corpus_chunks,
+                12.0
+            )
+        ), patch.object(
+            harness,
+            "build_bm25_index",
+            return_value=bm25_index
+        ) as build_index, patch.object(
+            harness,
+            "evaluate_question",
+            return_value=result
+        ) as evaluate, patch(
+            "sys.stdout",
+            new_callable=StringIO
+        ):
+            harness.main()
+
+        build_index.assert_called_once_with(
+            corpus_chunks
+        )
+        evaluate.assert_called_once_with(
+            item(),
+            corpus_chunks,
+            bm25_index
+        )
+
+    def test_reference_fact_is_recorded_without_provider_input(self):
+        provider = Mock(
+            return_value="Grounded answer."
+        )
+        input_item = item()
+        input_item["REFERENCE_FACT"] = "Do not send this to Gemini."
+
+        result = self.accepted_result_with_provider(
+            provider,
+            input_item=input_item
+        )
+
+        self.assertEqual(
+            "Do not send this to Gemini.",
+            result["REFERENCE_FACT"]
+        )
+        provider.assert_called_once()
+        provider_question, provider_contexts = provider.call_args.args
+        self.assertEqual(
+            input_item["QUESTION"],
+            provider_question
+        )
+        self.assertIsInstance(
+            provider_contexts,
+            list
+        )
+
+    def accepted_result_with_provider(self, provider, input_item=None):
         contexts = [
             {
                 "document_id": "DOC001",
@@ -271,7 +371,7 @@ class RAGDevelopmentHarnessTests(unittest.TestCase):
             return_value=contexts
         ):
             return harness.evaluate_question(
-                item(),
+                input_item or item(),
                 [],
                 {},
                 answer_provider=provider

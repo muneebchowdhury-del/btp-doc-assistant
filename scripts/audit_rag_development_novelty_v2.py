@@ -40,6 +40,72 @@ PRIOR_FILES = (
 )
 AUDIT_OUTPUT = "docs/V2_RAG_DEVELOPMENT_NOVELTY_AUDIT.md"
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
+SUPPORTED_MANUAL_ASSESSMENTS = {
+    "RAGDEV001": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests the Cloud Foundry platform basis rather than asking only what the environment is or which runtimes it supports."
+    ),
+    "RAGDEV002": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests where development-phase responsibilities are documented before operations work, not the prior workflow or tool-choice scenario."
+    ),
+    "RAGDEV003": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests identification of the deployment lifecycle documentation after development, not the detailed push process or deployment artifacts."
+    ),
+    "RAGDEV004": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests how managed service capabilities are represented before credential attachment, not how an application consumes a service."
+    ),
+    "RAGDEV005": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests the binding operation as the app-service relationship, not where bound credentials can be found."
+    ),
+    "RAGDEV006": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests configuration separation from source code, not the earlier feature-flag or endpoint-change examples."
+    ),
+    "RAGDEV007": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests reserving and managing route addresses, not only making an app reachable or assigning a route."
+    ),
+    "RAGDEV008": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests choosing the roles documentation for organization and space permission assignment, not generic role availability."
+    ),
+    "RAGDEV009": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests viewing recent instance output during troubleshooting, not crash diagnosis generally."
+    ),
+    "RAGDEV010": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests lifecycle record type identification for restaging or crashes, not broad event history lookup."
+    ),
+    "RAGDEV011": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests unbound service-instance credential artifacts, not service-key purpose in general."
+    ),
+    "RAGDEV012": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests locating documentation for assigning space resource limits, not explaining global entitlement or quota troubleshooting."
+    ),
+    "RAGDEV013": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests the feature that defines container network traffic rules, not a broad security-group how-to."
+    ),
+    "RAGDEV014": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests the relationship between routes and destination configuration for backend access, not only request forwarding."
+    ),
+    "RAGDEV015": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests SAP BTP as an extension and integration platform layer, not the broad capability inventory question."
+    ),
+    "RAGDEV016": (
+        "DISTINCT_FACT_OR_TASK",
+        "Tests where to learn shared terminology before service-specific guides, not an entitlement/quota failure scenario."
+    )
+}
 TOKEN_PATTERN = re.compile(
     r"[A-Za-z0-9]+"
 )
@@ -320,6 +386,29 @@ def write_audit(results, duplicate_ids, development_rows, prior_rows):
             )
         )
 
+    supported_results = [
+        result
+        for result in results
+        if result["category"] == "SUPPORTED"
+    ]
+
+    lines.extend(
+        [
+            "",
+            "## Supported Question Manual Distinctness Review",
+            "",
+            "| Query ID | Manual Assessment | Rationale |",
+            "| --- | --- | --- |"
+        ]
+    )
+
+    for result in supported_results:
+        lines.append(
+            "| {query_id} | {manual_assessment} | {manual_rationale} |".format(
+                **result
+            )
+        )
+
     lines.extend(
         [
             "",
@@ -371,6 +460,8 @@ def run_audit():
     )
 
     results = []
+    missing_supported_assessments = []
+    same_fact_paraphrases = []
 
     for row, development_embedding in zip(
         development_rows,
@@ -396,6 +487,22 @@ def run_audit():
             prior_rows,
             prior_embeddings
         )
+        manual_assessment = ""
+        manual_rationale = ""
+
+        if row["CATEGORY"] == "SUPPORTED":
+            if query_id not in SUPPORTED_MANUAL_ASSESSMENTS:
+                missing_supported_assessments.append(
+                    query_id
+                )
+            else:
+                manual_assessment, manual_rationale = SUPPORTED_MANUAL_ASSESSMENTS[
+                    query_id
+                ]
+                if manual_assessment == "SAME_FACT_PARAPHRASE":
+                    same_fact_paraphrases.append(
+                        query_id
+                    )
 
         results.append(
             {
@@ -417,8 +524,29 @@ def run_audit():
                     "EXACT_DUPLICATE"
                     if normalized_question in prior_by_normalized_question
                     else "NO_EXACT_DUPLICATE_REVIEW_REQUIRED"
+                ),
+                "manual_assessment": manual_assessment,
+                "manual_rationale": manual_rationale.replace(
+                    "|",
+                    "\\|"
                 )
             }
+        )
+
+    if missing_supported_assessments:
+        raise SystemExit(
+            "Missing supported manual novelty assessments: "
+            + ", ".join(
+                missing_supported_assessments
+            )
+        )
+
+    if same_fact_paraphrases:
+        raise SystemExit(
+            "Supported RAG development questions require rewrite: "
+            + ", ".join(
+                same_fact_paraphrases
+            )
         )
 
     write_audit(

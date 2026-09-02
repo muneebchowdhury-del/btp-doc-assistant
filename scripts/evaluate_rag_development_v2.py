@@ -203,6 +203,10 @@ def evaluate_question(
         "EXPECTED_SUPPORTED": item["EXPECTED_SUPPORTED"].strip(),
         "EXPECTED_DOCUMENT_ID": item["EXPECTED_DOCUMENT_ID"].strip(),
         "CATEGORY": item["CATEGORY"],
+        "REFERENCE_FACT": item.get(
+            "REFERENCE_FACT",
+            ""
+        ).strip(),
         "DENSE_RANK1_DOCUMENT_ID": document_at(
             dense_documents,
             0
@@ -270,7 +274,7 @@ def format_result_row(result):
 
 def main():
     queries = load_development_queries()
-    corpus_chunks = fetch_corpus_chunks()
+    corpus_chunks, corpus_read_ms = fetch_corpus_chunks()
     bm25_index = build_bm25_index(
         corpus_chunks
     )
