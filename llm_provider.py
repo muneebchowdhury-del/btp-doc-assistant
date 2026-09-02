@@ -1,10 +1,13 @@
 from dataclasses import dataclass
+import json
 import os
 from typing import Any
 
 
 GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_API_KEY_ENV_VAR = "GEMINI_API_KEY"
+GEMINI_CF_SERVICE_NAME = "gemini-rag-dev"
+VCAP_SERVICES_ENV_VAR = "VCAP_SERVICES"
 
 REQUIRED_CONTEXT_FIELDS = (
     "document_id",
@@ -219,15 +222,83 @@ def _extract_response_text(response: Any) -> str:
     return ""
 
 
-def _generate_with_gemini(payload: GroundedPromptPayload) -> str:
-    api_key = os.getenv(
-        GEMINI_API_KEY_ENV_VAR
+def _resolve_gemini_api_key() -> str:
+    direct_api_key = str(
+        os.getenv(
+            GEMINI_API_KEY_ENV_VAR
+        )
+        or ""
+    ).strip()
+
+    if direct_api_key:
+        return direct_api_key
+
+    vcap_services = str(
+        os.getenv(
+            VCAP_SERVICES_ENV_VAR
+        )
+        or ""
+    ).strip()
+
+    if vcap_services:
+        try:
+            service_groups = json.loads(
+                vcap_services
+            )
+        except json.JSONDecodeError:
+            service_groups = {}
+
+        if isinstance(
+            service_groups,
+            dict
+        ):
+            for services in service_groups.values():
+                if not isinstance(
+                    services,
+                    list
+                ):
+                    continue
+
+                for service in services:
+                    if not isinstance(
+                        service,
+                        dict
+                    ):
+                        continue
+
+                    if service.get(
+                        "name"
+                    ) != GEMINI_CF_SERVICE_NAME:
+                        continue
+
+                    credentials = service.get(
+                        "credentials",
+                        {}
+                    )
+
+                    if not isinstance(
+                        credentials,
+                        dict
+                    ):
+                        continue
+
+                    service_api_key = str(
+                        credentials.get(
+                            GEMINI_API_KEY_ENV_VAR
+                        )
+                        or ""
+                    ).strip()
+
+                    if service_api_key:
+                        return service_api_key
+
+    raise LLMProviderCredentialError(
+        f"{GEMINI_API_KEY_ENV_VAR} is not configured; no LLM request was made."
     )
 
-    if not api_key:
-        raise LLMProviderCredentialError(
-            f"{GEMINI_API_KEY_ENV_VAR} is not set; no LLM request was made."
-        )
+
+def _generate_with_gemini(payload: GroundedPromptPayload) -> str:
+    api_key = _resolve_gemini_api_key()
 
     from google import genai
     from google.genai import types

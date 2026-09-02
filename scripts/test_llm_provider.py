@@ -1,10 +1,14 @@
+import json
 import unittest
 from unittest.mock import patch
 
 from llm_provider import (
+    GEMINI_API_KEY_ENV_VAR,
     GEMINI_MODEL,
+    VCAP_SERVICES_ENV_VAR,
     LLMProviderCredentialError,
     _extract_response_text,
+    _resolve_gemini_api_key,
     build_grounded_prompt,
     generate_grounded_answer,
     normalize_contexts
@@ -91,6 +95,113 @@ class LLMProviderTests(unittest.TestCase):
             "Grounded answer from Gemini.",
             _extract_response_text(
                 GeminiResponse()
+            )
+        )
+
+    def test_direct_gemini_api_key_resolves(self):
+        with patch.dict(
+            "os.environ",
+            {
+                GEMINI_API_KEY_ENV_VAR: "direct-key"
+            },
+            clear=True
+        ):
+            self.assertEqual(
+                "direct-key",
+                _resolve_gemini_api_key()
+            )
+
+    def test_direct_gemini_api_key_takes_precedence_over_vcap(self):
+        vcap_services = {
+            "user-provided": [
+                {
+                    "name": "gemini-rag-dev",
+                    "credentials": {
+                        GEMINI_API_KEY_ENV_VAR: "vcap-key"
+                    }
+                }
+            ]
+        }
+
+        with patch.dict(
+            "os.environ",
+            {
+                GEMINI_API_KEY_ENV_VAR: "direct-key",
+                VCAP_SERVICES_ENV_VAR: json.dumps(
+                    vcap_services
+                )
+            },
+            clear=True
+        ):
+            self.assertEqual(
+                "direct-key",
+                _resolve_gemini_api_key()
+            )
+
+    def test_vcap_services_fallback_resolves_gemini_service_key(self):
+        vcap_services = {
+            "hana": [
+                {
+                    "name": "not-gemini",
+                    "credentials": {
+                        GEMINI_API_KEY_ENV_VAR: "wrong-key"
+                    }
+                }
+            ],
+            "user-provided": [
+                {
+                    "name": "gemini-rag-dev",
+                    "credentials": {
+                        GEMINI_API_KEY_ENV_VAR: "vcap-key"
+                    }
+                }
+            ]
+        }
+
+        with patch.dict(
+            "os.environ",
+            {
+                VCAP_SERVICES_ENV_VAR: json.dumps(
+                    vcap_services
+                )
+            },
+            clear=True
+        ):
+            self.assertEqual(
+                "vcap-key",
+                _resolve_gemini_api_key()
+            )
+
+    def test_missing_gemini_credential_raises_credential_error(self):
+        with patch.dict(
+            "os.environ",
+            {},
+            clear=True
+        ):
+            with self.assertRaises(LLMProviderCredentialError):
+                _resolve_gemini_api_key()
+
+    def test_malformed_vcap_services_raises_non_secret_credential_error(self):
+        with patch.dict(
+            "os.environ",
+            {
+                VCAP_SERVICES_ENV_VAR: "{malformed-json"
+            },
+            clear=True
+        ):
+            with self.assertRaises(LLMProviderCredentialError) as context:
+                _resolve_gemini_api_key()
+
+        self.assertNotIn(
+            "{malformed-json",
+            str(
+                context.exception
+            )
+        )
+        self.assertIn(
+            GEMINI_API_KEY_ENV_VAR,
+            str(
+                context.exception
             )
         )
 

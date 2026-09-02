@@ -165,7 +165,7 @@ The repository must not contain:
 
 No credentials are committed. Isolated synthetic provider connectivity testing has occurred, but no RAG answer-quality experiment or final end-to-end evaluation has occurred.
 
-The Gemini adapter reads credentials only from `GEMINI_API_KEY`. The key must never be printed, logged, or committed.
+The Gemini adapter reads credentials from `GEMINI_API_KEY`. In Cloud Foundry execution, if the direct environment variable is absent, the adapter may resolve `GEMINI_API_KEY` from the bound `gemini-rag-dev` user-provided service through `VCAP_SERVICES`. This is credential plumbing only and does not change the frozen scientific configuration, provider, model, retrieval architecture, gate, prompt, or evaluation boundary. The key must never be printed, logged, returned in errors, or committed.
 
 ## Isolated LLM Connectivity Test Result
 
