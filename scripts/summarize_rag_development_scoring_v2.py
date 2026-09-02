@@ -323,6 +323,35 @@ def summarize_manual_metrics(rows):
     }
 
 
+def print_manual_metrics_section(label, rows):
+    print(
+        f"\nManually scored observable LLM outputs - {label}"
+    )
+    metrics = summarize_manual_metrics(
+        rows
+    )
+    print(
+        f"- groundedness rate: {format_rate(metrics['groundedness'])}"
+    )
+    print(
+        f"- answer correctness rate: {format_rate(metrics['answer_correctness'])}"
+    )
+    print(
+        f"- citation correctness rate: {format_rate(metrics['citation_correctness'])}"
+    )
+    print(
+        f"- hallucination rate: {format_rate(metrics['hallucination'])}"
+    )
+    print(
+        f"- evidence-based refusal correctness: {format_rate(metrics['evidence_based_refusal'])}"
+    )
+    print(
+        "- mean concision score: "
+        f"{format_optional_float(metrics['concision_mean'])} "
+        f"({metrics['concision_count']} applicable)"
+    )
+
+
 def print_summary(rows):
     ensure_scored(
         rows
@@ -381,32 +410,16 @@ def print_summary(rows):
                 f"- {key}: {format_optional_float(value) if isinstance(value, float) else value}"
             )
 
-    print(
-        "\nManually scored observable LLM outputs"
+    print_manual_metrics_section(
+        "PRIMARY",
+        primary_rows
     )
-    metrics = summarize_manual_metrics(
-        rows
-    )
-    print(
-        f"- groundedness rate: {format_rate(metrics['groundedness'])}"
-    )
-    print(
-        f"- answer correctness rate: {format_rate(metrics['answer_correctness'])}"
-    )
-    print(
-        f"- citation correctness rate: {format_rate(metrics['citation_correctness'])}"
-    )
-    print(
-        f"- hallucination rate: {format_rate(metrics['hallucination'])}"
-    )
-    print(
-        f"- evidence-based refusal correctness: {format_rate(metrics['evidence_based_refusal'])}"
-    )
-    print(
-        "- mean concision score: "
-        f"{format_optional_float(metrics['concision_mean'])} "
-        f"({metrics['concision_count']} applicable)"
-    )
+
+    if secondary_rows:
+        print_manual_metrics_section(
+            "SECONDARY_RETRY",
+            secondary_rows
+        )
 
 
 def parse_args():

@@ -1,7 +1,9 @@
 import csv
+from io import StringIO
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import scripts.prepare_rag_development_scoring_v2 as prepare
 import scripts.summarize_rag_development_scoring_v2 as summarize
@@ -351,6 +353,139 @@ class RAGDevelopmentScoringTests(unittest.TestCase):
             summarize.ensure_scored(
                 rows
             )
+
+    def test_manual_metrics_are_summarized_separately_by_evidence_source(self):
+        rows = [
+            {
+                "QUERY_ID": "RAGDEV001",
+                "EVIDENCE_SOURCE": "PRIMARY",
+                "PRIMARY_OUTCOME": "GENERATED_ANSWER",
+                "GENERATION_OBSERVABILITY": "OBSERVED",
+                "SCORING_STATUS": "SCORED",
+                "ACCEPT_DECISION": "ACCEPT",
+                "GROUNDEDNESS": "1",
+                "ANSWER_CORRECTNESS": "",
+                "CITATION_CORRECTNESS": "",
+                "HALLUCINATION": "",
+                "EVIDENCE_BASED_REFUSAL": "",
+                "CONCISION": ""
+            },
+            {
+                "QUERY_ID": "RAGDEV008",
+                "EVIDENCE_SOURCE": "SECONDARY_RETRY",
+                "PRIMARY_OUTCOME": "PROVIDER_ERROR",
+                "SECONDARY_RETRY_OUTCOME": "GENERATED_ANSWER",
+                "GENERATION_OBSERVABILITY": "OBSERVED",
+                "SCORING_STATUS": "SCORED",
+                "ACCEPT_DECISION": "ACCEPT",
+                "GROUNDEDNESS": "0",
+                "ANSWER_CORRECTNESS": "",
+                "CITATION_CORRECTNESS": "",
+                "HALLUCINATION": "",
+                "EVIDENCE_BASED_REFUSAL": "",
+                "CONCISION": ""
+            }
+        ]
+
+        primary_metrics = summarize.summarize_manual_metrics(
+            [
+                row
+                for row in rows
+                if row["EVIDENCE_SOURCE"] == "PRIMARY"
+            ]
+        )
+        secondary_metrics = summarize.summarize_manual_metrics(
+            [
+                row
+                for row in rows
+                if row["EVIDENCE_SOURCE"] == "SECONDARY_RETRY"
+            ]
+        )
+
+        self.assertEqual(
+            (
+                1,
+                1,
+                1.0
+            ),
+            primary_metrics["groundedness"]
+        )
+        self.assertEqual(
+            (
+                0,
+                1,
+                0.0
+            ),
+            secondary_metrics["groundedness"]
+        )
+
+    def test_print_summary_has_no_combined_manual_metric_headline(self):
+        rows = [
+            {
+                "QUERY_ID": "RAGDEV001",
+                "EVIDENCE_SOURCE": "PRIMARY",
+                "PRIMARY_OUTCOME": "GENERATED_ANSWER",
+                "GENERATION_OBSERVABILITY": "OBSERVED",
+                "SCORING_STATUS": "SCORED",
+                "ACCEPT_DECISION": "ACCEPT",
+                "GROUNDEDNESS": "1",
+                "ANSWER_CORRECTNESS": "",
+                "CITATION_CORRECTNESS": "",
+                "HALLUCINATION": "",
+                "EVIDENCE_BASED_REFUSAL": "",
+                "CONCISION": ""
+            },
+            {
+                "QUERY_ID": "RAGDEV008",
+                "EVIDENCE_SOURCE": "SECONDARY_RETRY",
+                "PRIMARY_OUTCOME": "PROVIDER_ERROR",
+                "SECONDARY_RETRY_OUTCOME": "GENERATED_ANSWER",
+                "GENERATION_OBSERVABILITY": "OBSERVED",
+                "SCORING_STATUS": "SCORED",
+                "ACCEPT_DECISION": "ACCEPT",
+                "GROUNDEDNESS": "0",
+                "ANSWER_CORRECTNESS": "",
+                "CITATION_CORRECTNESS": "",
+                "HALLUCINATION": "",
+                "EVIDENCE_BASED_REFUSAL": "",
+                "CONCISION": ""
+            }
+        ]
+
+        with patch(
+            "sys.stdout",
+            new_callable=StringIO
+        ) as output:
+            summarize.print_summary(
+                rows
+            )
+
+        text = output.getvalue()
+
+        self.assertIn(
+            "Manually scored observable LLM outputs - PRIMARY",
+            text
+        )
+        self.assertIn(
+            "groundedness rate: 1.0000 (1/1)",
+            text
+        )
+        self.assertIn(
+            "Manually scored observable LLM outputs - SECONDARY_RETRY",
+            text
+        )
+        self.assertIn(
+            "groundedness rate: 0.0000 (0/1)",
+            text
+        )
+        self.assertNotIn(
+            "groundedness rate: 0.5000 (1/2)",
+            text
+        )
+        self.assertNotIn(
+            "Manually scored observable LLM outputs\n",
+            text
+        )
 
     def test_no_network_gemini_hana_or_retrieval_calls_occur(self):
         row = primary_row()
