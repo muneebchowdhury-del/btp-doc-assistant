@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import patch
 
 from llm_provider import (
+    GEMINI_MODEL,
     LLMProviderCredentialError,
-    OPENAI_MODEL,
     build_grounded_prompt,
     generate_grounded_answer,
     normalize_contexts
@@ -67,8 +67,8 @@ class LLMProviderTests(unittest.TestCase):
 
     def test_generate_does_not_call_provider_yet(self):
         self.assertEqual(
-            "gpt-5.6-terra",
-            OPENAI_MODEL
+            "gemini-3.7-flash",
+            GEMINI_MODEL
         )
 
         with patch.dict(

@@ -14,8 +14,8 @@ if PROJECT_ROOT not in sys.path:
 
 
 from llm_provider import (  # noqa: E402
-    OPENAI_API_KEY_ENV_VAR,
-    OPENAI_MODEL,
+    GEMINI_API_KEY_ENV_VAR,
+    GEMINI_MODEL,
     generate_grounded_answer
 )
 
@@ -38,16 +38,16 @@ CONTEXTS = [
 
 def main():
     if not os.getenv(
-        OPENAI_API_KEY_ENV_VAR
+        GEMINI_API_KEY_ENV_VAR
     ):
         print(
-            f"{OPENAI_API_KEY_ENV_VAR} is not set; connectivity test was not run."
+            f"{GEMINI_API_KEY_ENV_VAR} is not set; connectivity test was not run."
         )
         return 0
 
     print(
-        "Running isolated OpenAI Responses API connectivity test "
-        f"with model {OPENAI_MODEL}."
+        "Running isolated Gemini Developer API connectivity test "
+        f"with model {GEMINI_MODEL}."
     )
     answer = generate_grounded_answer(
         QUESTION,

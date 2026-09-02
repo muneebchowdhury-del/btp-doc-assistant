@@ -14,13 +14,25 @@ No further SAP AI Core investigation, entitlement work, service provisioning, se
 
 Because SAP AI Core with the required Generative AI Hub-capable `extended` plan is unavailable in the currently targeted environment, Version 2 will proceed with a provider-agnostic external LLM boundary while keeping SAP BTP Cloud Foundry and SAP HANA Cloud as the application and retrieval platform.
 
-The external generation provider is frozen for this project as:
+OpenAI was considered and an unexecuted adapter prototype was implemented before the provider decision changed. No OpenAI API request occurred. Before any generation experiment, the provider was changed to Gemini because the project requirement is zero API usage cost.
 
-- Provider: OpenAI API
-- API interface: Responses API
-- Model: `gpt-5.6-terra`
+The final external generation provider is frozen for this project as:
 
-This is a RAG-generation design choice. Multiple LLM providers or models will not be compared or tuned in this phase.
+- Provider: Google Gemini Developer API
+- Model: `gemini-3.7-flash`
+- Tier: Free
+- Python SDK: `google-genai`
+- Credential environment variable: `GEMINI_API_KEY`
+
+This is a RAG-generation design choice. Multiple LLM providers or models will not be compared or tuned in this phase. Gemini is an external generation provider and is not SAP-native.
+
+Free-tier input and output tokens are free subject to Google's current Gemini Developer API free-tier quotas. Billing was not enabled for this decision. Free-tier data may be used by Google to improve its products, so only public SAP documentation and non-sensitive research questions may be sent.
+
+References checked for this provider boundary:
+
+- Google Gen AI Python SDK documentation: `https://googleapis.github.io/python-genai/`
+- Gemini 3.7 Flash model documentation: `https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash`
+- Gemini Developer API pricing: `https://ai.google.dev/gemini-api/docs/pricing`
 
 ## Frozen Retrieval Boundary
 
@@ -91,7 +103,7 @@ The module also exposes unit-testable prompt construction helpers:
 - `build_context_block(contexts)`
 - `build_grounded_prompt(question, contexts)`
 
-No provider-specific logic should be spread through `app.py`. OpenAI-specific code is isolated behind the provider-neutral boundary so another provider could later replace it without changing retrieval.
+No provider-specific logic should be spread through `app.py`. Gemini-specific code is isolated behind the provider-neutral boundary so another provider could later replace it without changing retrieval.
 
 The context objects passed to the provider must contain at minimum:
 
@@ -145,13 +157,13 @@ The repository must not contain:
 
 This phase adds no credentials and makes no provider request.
 
-The OpenAI adapter reads credentials only from `OPENAI_API_KEY`. The key must never be printed, logged, or committed.
+The Gemini adapter reads credentials only from `GEMINI_API_KEY`. The key must never be printed, logged, or committed.
 
 ## Isolated LLM Connectivity Test Criteria
 
 A future isolated LLM connectivity test will be considered successful only if:
 
-- the frozen OpenAI Responses API provider and `gpt-5.6-terra` model are used
+- the frozen Gemini Developer API provider and `gemini-3.7-flash` model are used
 - credentials are supplied through environment variables or approved Cloud Foundry configuration
 - no credentials are printed or committed
 - the test uses a small fixed prompt and fixed dummy or reviewed context payload
@@ -159,7 +171,7 @@ A future isolated LLM connectivity test will be considered successful only if:
 - no production `app.py` behavior is changed
 - no retrieval, abstention, corpus, embedding, or evaluation setting is changed
 
-The connectivity test is only to prove `Python -> OpenAI API -> model response`. It is not an answer-quality experiment, prompt-tuning run, RAG evaluation, or production-readiness test.
+The connectivity test is only to prove `Python -> Gemini Developer API -> model response`. It is not an answer-quality experiment, prompt-tuning run, RAG evaluation, or production-readiness test.
 
 ## Evaluation Boundary
 

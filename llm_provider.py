@@ -3,8 +3,8 @@ import os
 from typing import Any
 
 
-OPENAI_MODEL = "gpt-5.6-terra"
-OPENAI_API_KEY_ENV_VAR = "OPENAI_API_KEY"
+GEMINI_MODEL = "gemini-3.7-flash"
+GEMINI_API_KEY_ENV_VAR = "GEMINI_API_KEY"
 
 REQUIRED_CONTEXT_FIELDS = (
     "document_id",
@@ -248,35 +248,29 @@ def _extract_response_text(response: Any) -> str:
     ).strip()
 
 
-def _generate_with_openai(payload: GroundedPromptPayload) -> str:
+def _generate_with_gemini(payload: GroundedPromptPayload) -> str:
     api_key = os.getenv(
-        OPENAI_API_KEY_ENV_VAR
+        GEMINI_API_KEY_ENV_VAR
     )
 
     if not api_key:
         raise LLMProviderCredentialError(
-            f"{OPENAI_API_KEY_ENV_VAR} is not set; no LLM request was made."
+            f"{GEMINI_API_KEY_ENV_VAR} is not set; no LLM request was made."
         )
 
-    from openai import OpenAI
+    from google import genai
+    from google.genai import types
 
-    client = OpenAI(
+    with genai.Client(
         api_key=api_key
-    )
-
-    response = client.responses.create(
-        model=OPENAI_MODEL,
-        input=[
-            {
-                "role": "system",
-                "content": payload.system
-            },
-            {
-                "role": "user",
-                "content": payload.user
-            }
-        ]
-    )
+    ) as client:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=payload.user,
+            config=types.GenerateContentConfig(
+                system_instruction=payload.system
+            )
+        )
 
     return _extract_response_text(
         response
@@ -289,7 +283,7 @@ def generate_grounded_answer(question: str, contexts: list[dict[str, Any]]) -> s
         contexts
     )
 
-    answer = _generate_with_openai(
+    answer = _generate_with_gemini(
         payload
     )
 
