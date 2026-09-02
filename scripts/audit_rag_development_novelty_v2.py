@@ -42,68 +42,68 @@ AUDIT_OUTPUT = "docs/V2_RAG_DEVELOPMENT_NOVELTY_AUDIT.md"
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
 SUPPORTED_MANUAL_ASSESSMENTS = {
     "RAGDEV001": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests the Cloud Foundry platform basis rather than asking only what the environment is or which runtimes it supports."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new development formulation focused on the Cloud Foundry platform basis; factual overlap with prior Cloud Foundry environment questions is expected."
     ),
     "RAGDEV002": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests where development-phase responsibilities are documented before operations work, not the prior workflow or tool-choice scenario."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new development scenario about development-phase responsibility before operations; overlap with prior Cloud Foundry development questions is expected."
     ),
     "RAGDEV003": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests identification of the deployment lifecycle documentation after development, not the detailed push process or deployment artifacts."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new development formulation about deployment lifecycle documentation after development; overlap with prior deployment questions is expected."
     ),
     "RAGDEV004": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests how managed service capabilities are represented before credential attachment, not how an application consumes a service."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new service-representation framing before credentials are attached; overlap with prior service-consumption questions is expected."
     ),
     "RAGDEV005": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests the binding operation as the app-service relationship, not where bound credentials can be found."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new formulation around the app-service relationship created by binding; overlap with prior binding and credential questions is expected."
     ),
     "RAGDEV006": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests configuration separation from source code, not the earlier feature-flag or endpoint-change examples."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new configuration-management framing around source-code separation; overlap with prior environment-variable questions is expected."
     ),
     "RAGDEV007": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests reserving and managing route addresses, not only making an app reachable or assigning a route."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new route-administration formulation around reserving and managing addresses; overlap with prior route questions is expected."
     ),
     "RAGDEV008": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests choosing the roles documentation for organization and space permission assignment, not generic role availability."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new permission-assignment scenario across organization and space roles; overlap with prior roles questions is expected."
     ),
     "RAGDEV009": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests viewing recent instance output during troubleshooting, not crash diagnosis generally."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new troubleshooting formulation focused on recent instance output; overlap with prior application-log questions is expected."
     ),
     "RAGDEV010": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests lifecycle record type identification for restaging or crashes, not broad event history lookup."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new formulation focused on lifecycle record type for restaging or crashes; overlap with prior application-event questions is expected."
     ),
     "RAGDEV011": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests unbound service-instance credential artifacts, not service-key purpose in general."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new credential-artifact scenario for access without a running bound app; overlap with prior service-key questions is expected."
     ),
     "RAGDEV012": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests locating documentation for assigning space resource limits, not explaining global entitlement or quota troubleshooting."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new documentation-location formulation for assigning space resource limits; overlap with prior quota questions is expected."
     ),
     "RAGDEV013": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests the feature that defines container network traffic rules, not a broad security-group how-to."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new feature-identification formulation for container network traffic rules; overlap with prior security-group questions is expected."
     ),
     "RAGDEV014": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests the relationship between routes and destination configuration for backend access, not only request forwarding."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new routes-and-destinations relationship formulation for backend access; overlap with prior routing/destination questions is expected."
     ),
     "RAGDEV015": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests SAP BTP as an extension and integration platform layer, not the broad capability inventory question."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new overview framing around extension and integration across SAP landscapes; overlap with prior SAP BTP overview questions is expected."
     ),
     "RAGDEV016": (
-        "DISTINCT_FACT_OR_TASK",
-        "Tests where to learn shared terminology before service-specific guides, not an entitlement/quota failure scenario."
+        "NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO",
+        "Uses a new terminology-before-service-guides scenario; overlap with prior basic platform concept questions is expected."
     )
 }
 TOKEN_PATTERN = re.compile(
@@ -332,7 +332,9 @@ def write_audit(results, duplicate_ids, development_rows, prior_rows):
         "",
         "The audit uses exact duplicate detection, normalized lexical Jaccard overlap, and local question-to-question embedding cosine similarity with FastEmbed `BAAI/bge-small-en-v1.5`. It does not query HANA, retrieve corpus documents, call Gemini, inspect retrieval scores, or execute the RAG development harness.",
         "",
-        "No arbitrary semantic-similarity rejection threshold is applied. Same-domain similarity is treated as acceptable when the question is substantively distinct and not an exact duplicate.",
+        "No arbitrary semantic-similarity rejection threshold is applied. Same-domain factual or conceptual overlap is expected because this is a development set over the same frozen corpus, not an independent final holdout.",
+        "",
+        "The questions must not be interpreted as a fresh independent final evaluation set. Retrieval architecture and thresholds will not be tuned from these results. A completely fresh end-to-end RAG evaluation set will be created only after the generation architecture is finalized.",
         "",
         "## Dataset Composition",
         "",
@@ -395,7 +397,7 @@ def write_audit(results, duplicate_ids, development_rows, prior_rows):
     lines.extend(
         [
             "",
-            "## Supported Question Manual Distinctness Review",
+            "## Supported Question Manual Development-Set Review",
             "",
             "| Query ID | Manual Assessment | Rationale |",
             "| --- | --- | --- |"

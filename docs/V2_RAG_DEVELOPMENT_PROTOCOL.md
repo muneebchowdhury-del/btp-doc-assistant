@@ -38,9 +38,13 @@ Composition:
 - Near-domain unsupported: `4`
 - Out-of-scope: `4`
 
-The questions are fresh development questions and are not frozen retrieval held-out questions. Supported rows include an expected source document and a concise pre-execution `REFERENCE_FACT` grounded in the active V2 corpus.
+The questions are development questions and are not frozen retrieval held-out questions. No exact prior question is reused. Supported rows include an expected source document and a concise pre-execution `REFERENCE_FACT` grounded in the active V2 corpus.
+
+Some factual and conceptual overlap with previous retrieval questions is expected because this development set uses the same frozen corpus and exercises documents that have already been used during retrieval research. These questions must not be interpreted as a fresh independent final evaluation set.
 
 This dataset may be used for RAG development analysis after review. It is not a final end-to-end evaluation set.
+
+Retrieval architecture and thresholds will not be tuned from these results. A completely fresh end-to-end RAG evaluation set will be created only after the generation architecture is finalized.
 
 ## Novelty And Leakage Check
 
@@ -59,9 +63,11 @@ The audit uses:
 
 The audit does not query HANA, retrieve corpus documents, call Gemini, inspect retrieval scores, or execute the RAG development harness.
 
-No arbitrary semantic-similarity rejection threshold is used. Natural same-domain semantic similarity is acceptable when the question is substantively distinct and not an exact duplicate.
+No arbitrary semantic-similarity rejection threshold is used. Natural same-domain semantic similarity is acceptable for this development set when the question uses a new formulation or scenario and is not an exact duplicate.
 
 Audit evidence is recorded in `docs/V2_RAG_DEVELOPMENT_NOVELTY_AUDIT.md`.
+
+The audit records a manual supported-question assessment using `NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO` to avoid overclaiming fact-level independence.
 
 ## Frozen Development Pipeline
 
@@ -82,6 +88,23 @@ Question
 ```
 
 The RAG harness must call `build_rag_contexts_from_hybrid_results(hybrid_chunks)` using the helper's default fixed Top-5 behavior. The context limit must not be overridden.
+
+## Execution Policy
+
+Before any RAGDEV answer is observed, the primary development run policy is frozen:
+
+- questions execute in fixed CSV order from `RAGDEV001` through `RAGDEV024`
+- Gemini model remains `gemini-3.5-flash`
+- Gemini sampling and generation parameters remain provider/model defaults
+- no `temperature`, `top_p`, or `top_k` tuning is performed
+- exactly one provider attempt is made per gate-accepted question during the primary development run
+- no automatic fallback model is used
+- no automatic provider retry is used
+- provider/API errors are preserved as `PROVIDER_ERROR` in the primary results rather than silently replaced
+- pipeline-abstained questions never call Gemini
+- the original primary-run output must be preserved even if a later, separately documented provider-error retry is scientifically justified
+
+No retry logic is added to the harness for this pre-execution preparation.
 
 ## Recorded Per-Query Fields
 

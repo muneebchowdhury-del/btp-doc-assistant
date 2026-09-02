@@ -6,7 +6,9 @@ This local-only audit checks the pre-registered RAG development questions agains
 
 The audit uses exact duplicate detection, normalized lexical Jaccard overlap, and local question-to-question embedding cosine similarity with FastEmbed `BAAI/bge-small-en-v1.5`. It does not query HANA, retrieve corpus documents, call Gemini, inspect retrieval scores, or execute the RAG development harness.
 
-No arbitrary semantic-similarity rejection threshold is applied. Same-domain similarity is treated as acceptable when the question is substantively distinct and not an exact duplicate.
+No arbitrary semantic-similarity rejection threshold is applied. Same-domain factual or conceptual overlap is expected because this is a development set over the same frozen corpus, not an independent final holdout.
+
+The questions must not be interpreted as a fresh independent final evaluation set. Retrieval architecture and thresholds will not be tuned from these results. A completely fresh end-to-end RAG evaluation set will be created only after the generation architecture is finalized.
 
 ## Dataset Composition
 
@@ -49,26 +51,26 @@ No exact duplicate questions were found.
 | RAGDEV023 | OUT_OF_SCOPE | HOUT037: How do I plan a vegetable garden for a shaded balcony? | 0.1250 | HOUT039: How should I organize a small conference agenda for two tracks? | 0.5804 | NO_EXACT_DUPLICATE_REVIEW_REQUIRED |
 | RAGDEV024 | OUT_OF_SCOPE | Q001: How do I bind an application to an existing service instance? | 0.0000 | HOUT040: What exercises strengthen wrists for rock climbing? | 0.6506 | NO_EXACT_DUPLICATE_REVIEW_REQUIRED |
 
-## Supported Question Manual Distinctness Review
+## Supported Question Manual Development-Set Review
 
 | Query ID | Manual Assessment | Rationale |
 | --- | --- | --- |
-| RAGDEV001 | DISTINCT_FACT_OR_TASK | Tests the Cloud Foundry platform basis rather than asking only what the environment is or which runtimes it supports. |
-| RAGDEV002 | DISTINCT_FACT_OR_TASK | Tests where development-phase responsibilities are documented before operations work, not the prior workflow or tool-choice scenario. |
-| RAGDEV003 | DISTINCT_FACT_OR_TASK | Tests identification of the deployment lifecycle documentation after development, not the detailed push process or deployment artifacts. |
-| RAGDEV004 | DISTINCT_FACT_OR_TASK | Tests how managed service capabilities are represented before credential attachment, not how an application consumes a service. |
-| RAGDEV005 | DISTINCT_FACT_OR_TASK | Tests the binding operation as the app-service relationship, not where bound credentials can be found. |
-| RAGDEV006 | DISTINCT_FACT_OR_TASK | Tests configuration separation from source code, not the earlier feature-flag or endpoint-change examples. |
-| RAGDEV007 | DISTINCT_FACT_OR_TASK | Tests reserving and managing route addresses, not only making an app reachable or assigning a route. |
-| RAGDEV008 | DISTINCT_FACT_OR_TASK | Tests choosing the roles documentation for organization and space permission assignment, not generic role availability. |
-| RAGDEV009 | DISTINCT_FACT_OR_TASK | Tests viewing recent instance output during troubleshooting, not crash diagnosis generally. |
-| RAGDEV010 | DISTINCT_FACT_OR_TASK | Tests lifecycle record type identification for restaging or crashes, not broad event history lookup. |
-| RAGDEV011 | DISTINCT_FACT_OR_TASK | Tests unbound service-instance credential artifacts, not service-key purpose in general. |
-| RAGDEV012 | DISTINCT_FACT_OR_TASK | Tests locating documentation for assigning space resource limits, not explaining global entitlement or quota troubleshooting. |
-| RAGDEV013 | DISTINCT_FACT_OR_TASK | Tests the feature that defines container network traffic rules, not a broad security-group how-to. |
-| RAGDEV014 | DISTINCT_FACT_OR_TASK | Tests the relationship between routes and destination configuration for backend access, not only request forwarding. |
-| RAGDEV015 | DISTINCT_FACT_OR_TASK | Tests SAP BTP as an extension and integration platform layer, not the broad capability inventory question. |
-| RAGDEV016 | DISTINCT_FACT_OR_TASK | Tests where to learn shared terminology before service-specific guides, not an entitlement/quota failure scenario. |
+| RAGDEV001 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new development formulation focused on the Cloud Foundry platform basis; factual overlap with prior Cloud Foundry environment questions is expected. |
+| RAGDEV002 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new development scenario about development-phase responsibility before operations; overlap with prior Cloud Foundry development questions is expected. |
+| RAGDEV003 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new development formulation about deployment lifecycle documentation after development; overlap with prior deployment questions is expected. |
+| RAGDEV004 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new service-representation framing before credentials are attached; overlap with prior service-consumption questions is expected. |
+| RAGDEV005 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new formulation around the app-service relationship created by binding; overlap with prior binding and credential questions is expected. |
+| RAGDEV006 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new configuration-management framing around source-code separation; overlap with prior environment-variable questions is expected. |
+| RAGDEV007 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new route-administration formulation around reserving and managing addresses; overlap with prior route questions is expected. |
+| RAGDEV008 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new permission-assignment scenario across organization and space roles; overlap with prior roles questions is expected. |
+| RAGDEV009 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new troubleshooting formulation focused on recent instance output; overlap with prior application-log questions is expected. |
+| RAGDEV010 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new formulation focused on lifecycle record type for restaging or crashes; overlap with prior application-event questions is expected. |
+| RAGDEV011 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new credential-artifact scenario for access without a running bound app; overlap with prior service-key questions is expected. |
+| RAGDEV012 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new documentation-location formulation for assigning space resource limits; overlap with prior quota questions is expected. |
+| RAGDEV013 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new feature-identification formulation for container network traffic rules; overlap with prior security-group questions is expected. |
+| RAGDEV014 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new routes-and-destinations relationship formulation for backend access; overlap with prior routing/destination questions is expected. |
+| RAGDEV015 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new overview framing around extension and integration across SAP landscapes; overlap with prior SAP BTP overview questions is expected. |
+| RAGDEV016 | NEW_DEVELOPMENT_FORMULATION_OR_SCENARIO | Uses a new terminology-before-service-guides scenario; overlap with prior basic platform concept questions is expected. |
 
 ## Result
 
