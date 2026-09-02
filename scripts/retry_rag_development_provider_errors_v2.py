@@ -1,13 +1,11 @@
+import ast
 import csv
 import sys
+import time
+from typing import Any, Callable
 
-from scripts.evaluate_rag_development_v2 import (
-    build_bm25_index,
-    evaluate_question,
-    fetch_corpus_chunks,
-    format_result_row,
-    load_development_queries
-)
+from llm_provider import generate_grounded_answer
+from scripts.evaluate_rag_development_v2 import classify_provider_answer
 
 
 PRIMARY_RESULTS_FILE = "data/rag_development_primary_results_v2.csv"
@@ -21,6 +19,16 @@ EXPECTED_PROVIDER_ERROR_IDS = (
     "RAGDEV015",
     "RAGDEV016",
     "RAGDEV019"
+)
+RETRY_FIELDNAMES = (
+    "QUERY_ID",
+    "QUESTION",
+    "PRIMARY_OUTCOME",
+    "PRIMARY_CONTEXT_DOCUMENT_IDS",
+    "RETRY_OUTCOME",
+    "RETRY_GEMINI_ANSWER_OR_REFUSAL",
+    "RETRY_PROVIDER_ERROR",
+    "RETRY_GENERATION_MS"
 )
 
 
@@ -70,32 +78,114 @@ def validate_provider_error_selection(rows):
         )
 
 
-def load_retry_questions(development_rows, retry_ids=EXPECTED_PROVIDER_ERROR_IDS):
-    by_query_id = {
-        row["QUERY_ID"]: row
-        for row in development_rows
-    }
-    missing_ids = [
-        query_id
-        for query_id in retry_ids
-        if query_id not in by_query_id
-    ]
+def parse_primary_contexts(row):
+    query_id = row.get(
+        "QUERY_ID",
+        ""
+    ).strip()
 
-    if missing_ids:
-        raise ValueError(
-            "Retry query IDs are missing from the frozen RAG development dataset: "
-            + ", ".join(
-                missing_ids
+    try:
+        contexts = ast.literal_eval(
+            row.get(
+                "CONTEXTS",
+                ""
             )
         )
+    except (
+        SyntaxError,
+        ValueError
+    ) as error:
+        raise ValueError(
+            f"Primary CONTEXTS field is malformed for {query_id}."
+        ) from error
 
-    return [
-        by_query_id[query_id]
-        for query_id in retry_ids
-    ]
+    if (
+        not isinstance(
+            contexts,
+            list
+        )
+        or not contexts
+        or not all(
+            isinstance(
+                context,
+                dict
+            )
+            for context in contexts
+        )
+    ):
+        raise ValueError(
+            f"Primary CONTEXTS field must be a non-empty list of dictionaries for {query_id}."
+        )
+
+    return contexts
 
 
-def prepare_retry_questions(primary_path=PRIMARY_RESULTS_FILE):
+def context_document_ids(contexts):
+    return ";".join(
+        str(
+            context.get(
+                "document_id",
+                ""
+            )
+        ).strip()
+        for context in contexts
+    )
+
+
+def retry_primary_row(
+    row: dict[str, str],
+    answer_provider: Callable[[str, list[dict[str, Any]]], str] = generate_grounded_answer
+) -> dict[str, Any]:
+    question = row.get(
+        "QUESTION",
+        ""
+    )
+    contexts = parse_primary_contexts(
+        row
+    )
+    generation_start = time.perf_counter()
+    answer = ""
+    provider_error = ""
+
+    try:
+        answer = answer_provider(
+            question,
+            contexts
+        )
+        outcome = classify_provider_answer(
+            answer
+        )
+    except Exception as error:  # noqa: BLE001
+        provider_error = str(
+            error
+        )
+        outcome = "PROVIDER_ERROR"
+
+    generation_ms = (
+        time.perf_counter() - generation_start
+    ) * 1000
+
+    return {
+        "QUERY_ID": row.get(
+            "QUERY_ID",
+            ""
+        ).strip(),
+        "QUESTION": question,
+        "PRIMARY_OUTCOME": row.get(
+            "OUTCOME",
+            ""
+        ).strip(),
+        "PRIMARY_CONTEXT_DOCUMENT_IDS": context_document_ids(
+            contexts
+        ),
+        "RETRY_OUTCOME": outcome,
+        "RETRY_GEMINI_ANSWER_OR_REFUSAL": answer,
+        "RETRY_PROVIDER_ERROR": provider_error,
+        "RETRY_GENERATION_MS": generation_ms
+    }
+
+
+def prepare_retry_rows(primary_path=PRIMARY_RESULTS_FILE):
     primary_rows = read_primary_results(
         primary_path
     )
@@ -106,43 +196,41 @@ def prepare_retry_questions(primary_path=PRIMARY_RESULTS_FILE):
         provider_error_rows
     )
 
-    return load_retry_questions(
-        load_development_queries(),
-        selected_query_ids(
-            provider_error_rows
+    for row in provider_error_rows:
+        parse_primary_contexts(
+            row
         )
-    )
+
+    return provider_error_rows
 
 
-def run_retry():
-    retry_questions = prepare_retry_questions()
-    corpus_chunks, corpus_read_ms = fetch_corpus_chunks()
-    bm25_index = build_bm25_index(
-        corpus_chunks
-    )
-
+def run_retry(
+    primary_path=PRIMARY_RESULTS_FILE,
+    answer_provider: Callable[[str, list[dict[str, Any]]], str] = generate_grounded_answer
+):
     return [
-        evaluate_question(
-            item,
-            corpus_chunks,
-            bm25_index
+        retry_primary_row(
+            row,
+            answer_provider=answer_provider
         )
-        for item in retry_questions
+        for row in prepare_retry_rows(
+            primary_path
+        )
     ]
 
 
-def write_results(results, output=sys.stdout):
-    if not results:
-        return
-
-    fieldnames = list(
-        format_result_row(
-            results[0]
-        ).keys()
+def format_result_row(result):
+    row = dict(
+        result
     )
+    row["RETRY_GENERATION_MS"] = f"{float(row['RETRY_GENERATION_MS']):.2f}"
+    return row
+
+
+def write_results(results, output=sys.stdout):
     writer = csv.DictWriter(
         output,
-        fieldnames=fieldnames,
+        fieldnames=RETRY_FIELDNAMES,
         lineterminator="\n"
     )
     writer.writeheader()
