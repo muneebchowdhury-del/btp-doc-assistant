@@ -1,6 +1,10 @@
 from dataclasses import dataclass
+import os
 from typing import Any
 
+
+OPENAI_MODEL = "gpt-5.6-terra"
+OPENAI_API_KEY_ENV_VAR = "OPENAI_API_KEY"
 
 REQUIRED_CONTEXT_FIELDS = (
     "document_id",
@@ -23,6 +27,10 @@ Keep the answer concise and documentation-oriented."""
 
 class LLMProviderNotConfigured(RuntimeError):
     """Raised when generation is requested before a provider is configured."""
+
+
+class LLMProviderCredentialError(RuntimeError):
+    """Raised when the configured provider cannot find required credentials."""
 
 
 @dataclass(frozen=True)
@@ -196,12 +204,98 @@ def build_grounded_prompt(question: str, contexts: list[dict[str, Any]]) -> Grou
     )
 
 
+def _extract_response_text(response: Any) -> str:
+    output_text = getattr(
+        response,
+        "output_text",
+        None
+    )
+
+    if output_text:
+        return str(
+            output_text
+        ).strip()
+
+    output_items = getattr(
+        response,
+        "output",
+        []
+    )
+    text_parts = []
+
+    for item in output_items:
+        content_items = getattr(
+            item,
+            "content",
+            []
+        )
+
+        for content in content_items:
+            text = getattr(
+                content,
+                "text",
+                None
+            )
+            if text:
+                text_parts.append(
+                    str(
+                        text
+                    )
+                )
+
+    return "\n".join(
+        text_parts
+    ).strip()
+
+
+def _generate_with_openai(payload: GroundedPromptPayload) -> str:
+    api_key = os.getenv(
+        OPENAI_API_KEY_ENV_VAR
+    )
+
+    if not api_key:
+        raise LLMProviderCredentialError(
+            f"{OPENAI_API_KEY_ENV_VAR} is not set; no LLM request was made."
+        )
+
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key=api_key
+    )
+
+    response = client.responses.create(
+        model=OPENAI_MODEL,
+        input=[
+            {
+                "role": "system",
+                "content": payload.system
+            },
+            {
+                "role": "user",
+                "content": payload.user
+            }
+        ]
+    )
+
+    return _extract_response_text(
+        response
+    )
+
+
 def generate_grounded_answer(question: str, contexts: list[dict[str, Any]]) -> str:
-    build_grounded_prompt(
+    payload = build_grounded_prompt(
         question,
         contexts
     )
 
-    raise LLMProviderNotConfigured(
-        "No external LLM provider adapter is configured; no LLM request was made."
+    answer = _generate_with_openai(
+        payload
     )
+
+    if not answer:
+        raise LLMProviderNotConfigured(
+            "The LLM provider returned no text."
+        )
+
+    return answer

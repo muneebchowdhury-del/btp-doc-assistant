@@ -1,7 +1,9 @@
 import unittest
+from unittest.mock import patch
 
 from llm_provider import (
-    LLMProviderNotConfigured,
+    LLMProviderCredentialError,
+    OPENAI_MODEL,
     build_grounded_prompt,
     generate_grounded_answer,
     normalize_contexts
@@ -64,11 +66,21 @@ class LLMProviderTests(unittest.TestCase):
         )
 
     def test_generate_does_not_call_provider_yet(self):
-        with self.assertRaises(LLMProviderNotConfigured):
-            generate_grounded_answer(
-                "What is supported?",
-                self.sample_contexts()
-            )
+        self.assertEqual(
+            "gpt-5.6-terra",
+            OPENAI_MODEL
+        )
+
+        with patch.dict(
+            "os.environ",
+            {},
+            clear=True
+        ):
+            with self.assertRaises(LLMProviderCredentialError):
+                generate_grounded_answer(
+                    "What is supported?",
+                    self.sample_contexts()
+                )
 
     def test_missing_context_field_fails(self):
         with self.assertRaises(ValueError):

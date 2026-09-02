@@ -14,7 +14,13 @@ No further SAP AI Core investigation, entitlement work, service provisioning, se
 
 Because SAP AI Core with the required Generative AI Hub-capable `extended` plan is unavailable in the currently targeted environment, Version 2 will proceed with a provider-agnostic external LLM boundary while keeping SAP BTP Cloud Foundry and SAP HANA Cloud as the application and retrieval platform.
 
-No alternative external provider is selected in this protocol.
+The external generation provider is frozen for this project as:
+
+- Provider: OpenAI API
+- API interface: Responses API
+- Model: `gpt-5.6-terra`
+
+This is a RAG-generation design choice. Multiple LLM providers or models will not be compared or tuned in this phase.
 
 ## Frozen Retrieval Boundary
 
@@ -46,6 +52,16 @@ question
 -> grounded answer or refusal
 ```
 
+Generation context construction is deterministic:
+
+- retrieval continues to produce the frozen full Hybrid RRF ranking
+- document-level results are deduplicated as already defined
+- the RAG stage takes the Top-5 unique documents
+- for each selected document, the provider receives the highest-ranked fused chunk belonging to that document as that document's `chunk_text`
+- document-level retrieval order is preserved as `retrieval_rank`
+
+This is the fixed RAG context-construction rule. It must not be adjusted by inspecting or reusing final held-out questions.
+
 ## Top-5 RAG Context Decision
 
 The RAG stage will use Top-5 retrieved unique-document evidence as the generation context depth.
@@ -75,7 +91,7 @@ The module also exposes unit-testable prompt construction helpers:
 - `build_context_block(contexts)`
 - `build_grounded_prompt(question, contexts)`
 
-No provider-specific logic should be spread through `app.py`. A future implementation may add a provider adapter behind this interface after provider selection and credential review.
+No provider-specific logic should be spread through `app.py`. OpenAI-specific code is isolated behind the provider-neutral boundary so another provider could later replace it without changing retrieval.
 
 The context objects passed to the provider must contain at minimum:
 
@@ -129,11 +145,13 @@ The repository must not contain:
 
 This phase adds no credentials and makes no provider request.
 
+The OpenAI adapter reads credentials only from `OPENAI_API_KEY`. The key must never be printed, logged, or committed.
+
 ## Isolated LLM Connectivity Test Criteria
 
 A future isolated LLM connectivity test will be considered successful only if:
 
-- a concrete provider has been explicitly selected and approved
+- the frozen OpenAI Responses API provider and `gpt-5.6-terra` model are used
 - credentials are supplied through environment variables or approved Cloud Foundry configuration
 - no credentials are printed or committed
 - the test uses a small fixed prompt and fixed dummy or reviewed context payload
@@ -141,7 +159,7 @@ A future isolated LLM connectivity test will be considered successful only if:
 - no production `app.py` behavior is changed
 - no retrieval, abstention, corpus, embedding, or evaluation setting is changed
 
-If SAP AI Core / Generative AI Hub remains unavailable, the test must not silently substitute another provider without explicit review.
+The connectivity test is only to prove `Python -> OpenAI API -> model response`. It is not an answer-quality experiment, prompt-tuning run, RAG evaluation, or production-readiness test.
 
 ## Evaluation Boundary
 
@@ -153,8 +171,6 @@ Future generated-answer evaluation must be separated from retrieval evaluation a
 
 This phase does not:
 
-- choose an external LLM provider
-- select an LLM model
 - make an LLM request
 - implement RAG in production
 - modify production answer behavior in `app.py`

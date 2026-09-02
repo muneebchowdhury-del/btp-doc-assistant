@@ -4,3 +4,4 @@ hdbcli
 fastembed
 requests
 beautifulsoup4
+openai
