@@ -42,7 +42,9 @@ The audit must check:
 
 - exact duplicate questions
 - nearest prior question by normalized lexical overlap
-- scenario-level or semantic closeness by manual review of the nearest prior question
+- nearest prior question by local question-to-question embedding cosine similarity
+- scenario-level or semantic closeness by manual review of the nearest lexical and semantic prior questions
+- explicitly maintained `DISTINCT` or `TOO_SIMILAR` assessments with short rationales for all 40 held-out questions
 
 The audit must not:
 
@@ -51,7 +53,7 @@ The audit must not:
 - inspect retrieval scores
 - execute the held-out evaluator
 
-The approved pre-execution audit evidence is recorded in `docs/V2_HELDOUT_NOVELTY_AUDIT.md`. Every held-out question must have a nearest prior query ID, nearest prior question, overlap diagnostic, and manual assessment. Any question marked `TOO_SIMILAR` must be revised before execution.
+The approved pre-execution audit evidence is recorded in `docs/V2_HELDOUT_NOVELTY_AUDIT.md`. Manual assessments are maintained in `data/retrieval_abstention_heldout_v2_assessments.csv`; they must not be inferred automatically from exact-duplicate status. Every held-out question must have nearest prior query IDs, nearest prior questions, lexical and embedding similarity diagnostics, a manual assessment, and a rationale. Any question with a missing assessment or marked `TOO_SIMILAR` must be revised before execution.
 
 ## Frozen Candidate Configuration
 

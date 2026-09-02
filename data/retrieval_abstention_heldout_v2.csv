@@ -1,28 +1,28 @@
 QUERY_ID,QUESTION,EXPECTED_SUPPORTED,EXPECTED_DOCUMENT_ID,CATEGORY
-HOUT001,"Does SAP BTP Cloud Foundry provide a standards-based runtime where applications can be staged and operated with Cloud Foundry concepts?",1,DOC001,supported_cloud_foundry_concepts
-HOUT002,"Can a Cloud Foundry team mix local development workflows with SAP BTP tooling while preparing application code?",1,DOC002,supported_cloud_foundry_development
-HOUT003,"When a manifest-driven deployment does not behave as expected, what parts of the Cloud Foundry deployment process should I verify?",1,DOC003,supported_deployment
+HOUT001,"What role does the Cloud Foundry environment play as an application runtime inside SAP BTP compared with other environments?",1,DOC001,supported_cloud_foundry_concepts
+HOUT002,"How can developers structure Cloud Foundry application work before deployment when they need SAP BTP development guidance?",1,DOC002,supported_cloud_foundry_development
+HOUT003,"What deployment artifacts and parameters influence how Cloud Foundry stages an app and creates running instances?",1,DOC003,supported_deployment
 HOUT004,"How should I think about marketplace services and service instances before an application can consume a managed capability?",1,DOC004,supported_services
 HOUT005,"If an app is moved between spaces, why must its service bindings be recreated or checked instead of assuming the old connection follows it?",1,DOC005,supported_service_bindings
 HOUT006,"Where should runtime-specific values such as destinations flags or credentials be represented so an app can read them at startup?",1,DOC006,supported_environment_variables
 HOUT007,"If two applications need different hostnames in the same domain, what Cloud Foundry routing concept separates those entry points?",1,DOC007,supported_routes
 HOUT008,"What administrative unit inside a Cloud Foundry org holds its own apps services routes and members?",1,DOC009,supported_spaces
 HOUT009,"How are user responsibilities separated between organization-level and space-level administration in SAP BTP Cloud Foundry?",1,DOC010,supported_roles
-HOUT010,"Where does Cloud Foundry expose recent stdout and stderr output when an application instance is being diagnosed?",1,DOC011,supported_application_logs
-HOUT011,"How can I distinguish application-generated log messages from platform-recorded lifecycle events during troubleshooting?",1,DOC012,supported_application_events
-HOUT012,"How can administrators provide standalone service-instance credentials for scripts or integrations that are not deployed as Cloud Foundry apps?",1,DOC013,supported_service_keys
+HOUT010,"Can I stream application instance output while reproducing an error in SAP BTP Cloud Foundry?",1,DOC011,supported_application_logs
+HOUT011,"Which Cloud Foundry record helps confirm that the platform processed scaling deployment or crash-related actions?",1,DOC012,supported_application_events
+HOUT012,"How can service-instance credentials be issued for a command-line tool that runs outside the application lifecycle?",1,DOC013,supported_service_keys
 HOUT013,"How can an administrator cap memory routes or service usage for a Cloud Foundry space without changing global account entitlements?",1,DOC014,supported_space_quotas
 HOUT014,"What mechanism controls which external network destinations application containers may reach from a Cloud Foundry space?",1,DOC015,supported_security_groups
 HOUT015,"When an HTML5 frontend calls a backend through SAP BTP routing, where does destination configuration fit into that request path?",1,DOC016,supported_routes_destinations
 HOUT016,"Why might an enterprise choose SAP BTP as a common layer for extending existing SAP landscapes and building new business applications?",1,DOC017,supported_platform_overview
 HOUT017,"What platform concepts explain the difference between where resources are organized, where they run, and what services may be consumed?",1,DOC018,supported_basic_concepts
-HOUT018,"When should a company use directories or multiple subaccounts instead of putting all work under one account area?",1,DOC019,supported_account_model
+HOUT018,"How can a global account structure group subaccounts for delegated administration across business units?",1,DOC019,supported_account_model
 HOUT019,"Why can assigning entitlement to a subaccount still leave teams thinking carefully about quotas and available service plans?",1,DOC020,supported_entitlements_quotas
-HOUT020,"What does it mean for a SAP BTP service or application to be available only in certain regions?",1,DOC021,supported_regions
+HOUT020,"How do provider locations and regional availability affect where SAP BTP workloads and services can be used?",1,DOC021,supported_regions
 HOUT021,"Which tooling categories help developers and administrators work with SAP BTP from browsers local machines or command lines?",1,DOC022,supported_tools
-HOUT022,"Can a team start with no-cost SAP BTP exploration and later use free service plans in a regular account model?",1,DOC023,supported_trial_free_tier
-HOUT023,"What initial onboarding paths does SAP BTP recommend for someone choosing an environment and learning basic platform tasks?",1,DOC024,supported_getting_started
-HOUT024,"If a team confuses service keys with app bindings, how should they decide which credential mechanism fits an app versus an external tool?",1,DOC013,supported_service_credentials_confusable
+HOUT022,"Can trial access be used to explore SAP BTP services without treating it as a long-term productive account?",1,DOC023,supported_trial_free_tier
+HOUT023,"How does SAP BTP guide a first-time user from account access into an initial environment-specific hands-on task?",1,DOC024,supported_getting_started
+HOUT024,"An external scheduler and a deployed application both need the same service instance. Why might they use different credential mechanisms?",1,DOC013,supported_service_credentials_confusable
 HOUT025,"How do I model approval workflows and business rules in SAP Build Process Automation?",0,,unsupported_near_domain
 HOUT026,"What serving template should I choose for deploying a machine learning model in SAP AI Core?",0,,unsupported_near_domain
 HOUT027,"How do I configure push notifications and offline stores in SAP Mobile Services?",0,,unsupported_near_domain
