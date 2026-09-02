@@ -19,7 +19,7 @@ OpenAI was considered and an unexecuted adapter prototype was implemented before
 The final external generation provider is frozen for this project as:
 
 - Provider: Google Gemini Developer API
-- Model: `gemini-3.7-flash`
+- Model: `gemini-3.5-flash`
 - Tier: Free
 - Python SDK: `google-genai`
 - Credential environment variable: `GEMINI_API_KEY`
@@ -28,10 +28,12 @@ This is a RAG-generation design choice. Multiple LLM providers or models will no
 
 Free-tier input and output tokens are free subject to Google's current Gemini Developer API free-tier quotas. Billing was not enabled for this decision. Free-tier data may be used by Google to improve its products, so only public SAP documentation and non-sensitive research questions may be sent.
 
+After provider connectivity testing, `gemini-3.7-flash` was not retained because repeated authenticated requests returned provider-side `503 UNAVAILABLE` high-demand failures. `gemini-3.6-flash` metadata access succeeded, but a controlled synthetic generation request timed out after 45 seconds with zero response bytes. `gemini-3.5-flash` completed the controlled synthetic connectivity test and is therefore the selected external generation model for the next reviewed RAG-generation step.
+
 References checked for this provider boundary:
 
 - Google Gen AI Python SDK documentation: `https://googleapis.github.io/python-genai/`
-- Gemini 3.7 Flash model documentation: `https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash`
+- Gemini model documentation: `https://ai.google.dev/gemini-api/docs/models`
 - Gemini Developer API pricing: `https://ai.google.dev/gemini-api/docs/pricing`
 
 ## Frozen Retrieval Boundary
@@ -163,7 +165,7 @@ The Gemini adapter reads credentials only from `GEMINI_API_KEY`. The key must ne
 
 A future isolated LLM connectivity test will be considered successful only if:
 
-- the frozen Gemini Developer API provider and `gemini-3.7-flash` model are used
+- the frozen Gemini Developer API provider and `gemini-3.5-flash` model are used
 - credentials are supplied through environment variables or approved Cloud Foundry configuration
 - no credentials are printed or committed
 - the test uses a small fixed prompt and fixed dummy or reviewed context payload

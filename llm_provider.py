@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 
-GEMINI_MODEL = "gemini-3.7-flash"
+GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_API_KEY_ENV_VAR = "GEMINI_API_KEY"
 
 REQUIRED_CONTEXT_FIELDS = (

@@ -68,7 +68,7 @@ class LLMProviderTests(unittest.TestCase):
 
     def test_generate_does_not_call_provider_yet(self):
         self.assertEqual(
-            "gemini-3.7-flash",
+            "gemini-3.5-flash",
             GEMINI_MODEL
         )
 
