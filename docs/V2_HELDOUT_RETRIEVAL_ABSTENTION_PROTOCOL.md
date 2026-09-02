@@ -30,6 +30,29 @@ The held-out questions are intentionally new and must not duplicate or closely p
 
 No retrieval results may be inspected while creating or revising the held-out dataset.
 
+## Pre-Execution Novelty Audit
+
+Before any held-out retrieval execution, the dataset must pass a local novelty audit against:
+
+- `data/evaluation_queries.csv`
+- `data/evaluation_queries_v2_foundation.csv`
+- `data/retrieval_calibration_v2.csv`
+
+The audit must check:
+
+- exact duplicate questions
+- nearest prior question by normalized lexical overlap
+- scenario-level or semantic closeness by manual review of the nearest prior question
+
+The audit must not:
+
+- query HANA
+- retrieve corpus documents
+- inspect retrieval scores
+- execute the held-out evaluator
+
+The approved pre-execution audit evidence is recorded in `docs/V2_HELDOUT_NOVELTY_AUDIT.md`. Every held-out question must have a nearest prior query ID, nearest prior question, overlap diagnostic, and manual assessment. Any question marked `TOO_SIMILAR` must be revised before execution.
+
 ## Frozen Candidate Configuration
 
 The held-out evaluator must use exactly:

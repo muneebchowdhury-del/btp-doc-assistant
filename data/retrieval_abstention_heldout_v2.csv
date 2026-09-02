@@ -1,41 +1,41 @@
 QUERY_ID,QUESTION,EXPECTED_SUPPORTED,EXPECTED_DOCUMENT_ID,CATEGORY
-HOUT001,Can we run a Python API and a Java service side by side in the SAP BTP Cloud Foundry runtime?,1,DOC001,supported_cloud_foundry_concepts
-HOUT002,Our developers need to pick local tools and deployment descriptors for a new Cloud Foundry project. Which development documentation should they read?,1,DOC002,supported_cloud_foundry_development
-HOUT003,I have built a deployable archive and need to publish it to the SAP BTP Cloud Foundry environment. Which guide covers that flow?,1,DOC003,supported_deployment
-HOUT004,My application needs a managed backing capability such as a database or messaging service. Where is service consumption in Cloud Foundry explained?,1,DOC004,supported_services
-HOUT005,The app has a database service instance but cannot see its credentials at runtime. Which documentation explains attaching that service to the app?,1,DOC005,supported_service_bindings
-HOUT006,Operations wants to update an API URL for a running app without rebuilding its artifact. Which SAP BTP topic covers this configuration approach?,1,DOC006,supported_environment_variables
-HOUT007,The application is deployed but still needs a public hostname mapped to it. Which documentation explains creating that route?,1,DOC007,supported_routes
-HOUT008,We need separate Cloud Foundry areas for product teams inside the same organization. Which documentation explains creating and managing those areas?,1,DOC009,supported_spaces
-HOUT009,A teammate needs deployment rights in one Cloud Foundry space but should not manage the whole org. Which role documentation is relevant?,1,DOC010,supported_roles
-HOUT010,After a failed start command I need to inspect the messages emitted by the application process. Which documentation should I use?,1,DOC011,supported_application_logs
-HOUT011,Compliance wants to review when an app was started stopped or restaged by the platform. Which documentation covers those recorded lifecycle entries?,1,DOC012,supported_application_events
-HOUT012,A pipeline needs credentials for a service instance even though no app will be bound to it. Which SAP BTP documentation explains that artifact?,1,DOC013,supported_service_keys
-HOUT013,One Cloud Foundry space should be limited to fewer routes services and memory than another. Which documentation explains that limit plan?,1,DOC014,supported_space_quotas
-HOUT014,Security wants to control outbound traffic rules for applications in a Cloud Foundry space. Which documentation covers that network policy area?,1,DOC015,supported_security_groups
-HOUT015,Incoming app requests need to be forwarded to another target configured through destinations. Which documentation discusses this route and destination pattern?,1,DOC016,supported_routes_destinations
-HOUT016,A stakeholder asks what SAP BTP is for and which technology capabilities it brings together. Which overview should answer that?,1,DOC017,supported_platform_overview
-HOUT017,I am confused by accounts environments regions entitlements and quotas as core SAP BTP terms. Which concepts page should I start with?,1,DOC018,supported_basic_concepts
-HOUT018,Our tenant design needs to separate enterprise-level administration from deployable subaccount work. Which account structure documentation applies?,1,DOC019,supported_account_model
-HOUT019,A service plan exists commercially but a subaccount cannot consume it yet. Which documentation explains the assignment and quota mechanism?,1,DOC020,supported_entitlements_quotas
-HOUT020,The team is choosing where to host a subaccount for latency and compliance reasons. Which SAP BTP documentation explains location choices?,1,DOC021,supported_regions
-HOUT021,I need to know whether to use cockpit commands CLIs or IDE tools for managing SAP BTP resources. Which page covers tool options?,1,DOC022,supported_tools
-HOUT022,We want to experiment with SAP BTP before paying for a productive setup. Which documentation compares trial access and free tier usage?,1,DOC023,supported_trial_free_tier
-HOUT023,A new developer wants a guided entry point into SAP BTP rather than individual reference pages. Which getting-started documentation is intended for that?,1,DOC024,supported_getting_started
-HOUT024,Our app can call a service through injected binding credentials but another automation needs standalone credentials too. Which service-binding topic is most relevant first?,1,DOC005,supported_service_binding_confusable
-HOUT025,How do I design a SAP Build Apps mobile screen with offline synchronization?,0,,unsupported_near_domain
-HOUT026,Which SAP Integration Suite policy should I use to validate an OAuth token in API Management?,0,,unsupported_near_domain
-HOUT027,How do I define associations and draft enablement in a CAP CDS model?,0,,unsupported_near_domain
-HOUT028,What steps create a calculation view hierarchy in SAP HANA Cloud modeling tools?,0,,unsupported_near_domain
-HOUT029,How do I configure SAP Cloud Connector principal propagation for an on-premise ABAP system?,0,,unsupported_near_domain
-HOUT030,Which SAP Datasphere space type should I choose for a data marketplace scenario?,0,,unsupported_near_domain
-HOUT031,How do I configure SAP Event Mesh dead-letter queues and retry policies?,0,,unsupported_near_domain
-HOUT032,What Kubernetes annotations are needed for a Kyma workload using a service binding secret?,0,,unsupported_near_domain
-HOUT033,How do I choose a training plan for a first half marathon?,0,,unsupported_out_of_scope
-HOUT034,What ingredients do I need for a classic tiramisu dessert?,0,,unsupported_out_of_scope
-HOUT035,How can I troubleshoot a home Wi-Fi router that keeps disconnecting?,0,,unsupported_out_of_scope
-HOUT036,What are the main causes of inflation in macroeconomics?,0,,unsupported_out_of_scope
-HOUT037,How should I prune a young apple tree in spring?,0,,unsupported_out_of_scope
-HOUT038,What is the plot of Pride and Prejudice?,0,,unsupported_out_of_scope
-HOUT039,Which lens is best for street photography at night?,0,,unsupported_out_of_scope
-HOUT040,How do I prepare for a driver's license road test?,0,,unsupported_out_of_scope
+HOUT001,"Does SAP BTP Cloud Foundry provide a standards-based runtime where applications can be staged and operated with Cloud Foundry concepts?",1,DOC001,supported_cloud_foundry_concepts
+HOUT002,"Can a Cloud Foundry team mix local development workflows with SAP BTP tooling while preparing application code?",1,DOC002,supported_cloud_foundry_development
+HOUT003,"When a manifest-driven deployment does not behave as expected, what parts of the Cloud Foundry deployment process should I verify?",1,DOC003,supported_deployment
+HOUT004,"How should I think about marketplace services and service instances before an application can consume a managed capability?",1,DOC004,supported_services
+HOUT005,"If an app is moved between spaces, why must its service bindings be recreated or checked instead of assuming the old connection follows it?",1,DOC005,supported_service_bindings
+HOUT006,"Where should runtime-specific values such as destinations flags or credentials be represented so an app can read them at startup?",1,DOC006,supported_environment_variables
+HOUT007,"If two applications need different hostnames in the same domain, what Cloud Foundry routing concept separates those entry points?",1,DOC007,supported_routes
+HOUT008,"What administrative unit inside a Cloud Foundry org holds its own apps services routes and members?",1,DOC009,supported_spaces
+HOUT009,"How are user responsibilities separated between organization-level and space-level administration in SAP BTP Cloud Foundry?",1,DOC010,supported_roles
+HOUT010,"Where does Cloud Foundry expose recent stdout and stderr output when an application instance is being diagnosed?",1,DOC011,supported_application_logs
+HOUT011,"How can I distinguish application-generated log messages from platform-recorded lifecycle events during troubleshooting?",1,DOC012,supported_application_events
+HOUT012,"How can administrators provide standalone service-instance credentials for scripts or integrations that are not deployed as Cloud Foundry apps?",1,DOC013,supported_service_keys
+HOUT013,"How can an administrator cap memory routes or service usage for a Cloud Foundry space without changing global account entitlements?",1,DOC014,supported_space_quotas
+HOUT014,"What mechanism controls which external network destinations application containers may reach from a Cloud Foundry space?",1,DOC015,supported_security_groups
+HOUT015,"When an HTML5 frontend calls a backend through SAP BTP routing, where does destination configuration fit into that request path?",1,DOC016,supported_routes_destinations
+HOUT016,"Why might an enterprise choose SAP BTP as a common layer for extending existing SAP landscapes and building new business applications?",1,DOC017,supported_platform_overview
+HOUT017,"What platform concepts explain the difference between where resources are organized, where they run, and what services may be consumed?",1,DOC018,supported_basic_concepts
+HOUT018,"When should a company use directories or multiple subaccounts instead of putting all work under one account area?",1,DOC019,supported_account_model
+HOUT019,"Why can assigning entitlement to a subaccount still leave teams thinking carefully about quotas and available service plans?",1,DOC020,supported_entitlements_quotas
+HOUT020,"What does it mean for a SAP BTP service or application to be available only in certain regions?",1,DOC021,supported_regions
+HOUT021,"Which tooling categories help developers and administrators work with SAP BTP from browsers local machines or command lines?",1,DOC022,supported_tools
+HOUT022,"Can a team start with no-cost SAP BTP exploration and later use free service plans in a regular account model?",1,DOC023,supported_trial_free_tier
+HOUT023,"What initial onboarding paths does SAP BTP recommend for someone choosing an environment and learning basic platform tasks?",1,DOC024,supported_getting_started
+HOUT024,"If a team confuses service keys with app bindings, how should they decide which credential mechanism fits an app versus an external tool?",1,DOC013,supported_service_credentials_confusable
+HOUT025,"How do I model approval workflows and business rules in SAP Build Process Automation?",0,,unsupported_near_domain
+HOUT026,"What serving template should I choose for deploying a machine learning model in SAP AI Core?",0,,unsupported_near_domain
+HOUT027,"How do I configure push notifications and offline stores in SAP Mobile Services?",0,,unsupported_near_domain
+HOUT028,"What transport nodes and routes are required in SAP Cloud Transport Management?",0,,unsupported_near_domain
+HOUT029,"How do I create a planning model and story in SAP Analytics Cloud?",0,,unsupported_near_domain
+HOUT030,"Which monitoring use cases are covered by SAP Cloud ALM for operations?",0,,unsupported_near_domain
+HOUT031,"How do I create conditions and actions in SAP Alert Notification service?",0,,unsupported_near_domain
+HOUT032,"What repository roles are needed for SAP Document Management service integration option?",0,,unsupported_near_domain
+HOUT033,"How do I compare fixed-rate and variable-rate student loans?",0,,unsupported_out_of_scope
+HOUT034,"What practice routine helps a beginner learn jazz piano chords?",0,,unsupported_out_of_scope
+HOUT035,"How can I diagnose why a car engine overheats in traffic?",0,,unsupported_out_of_scope
+HOUT036,"What factors should I consider when buying a used apartment?",0,,unsupported_out_of_scope
+HOUT037,"How do I plan a vegetable garden for a shaded balcony?",0,,unsupported_out_of_scope
+HOUT038,"What are the major themes in the novel Frankenstein?",0,,unsupported_out_of_scope
+HOUT039,"How should I organize a small conference agenda for two tracks?",0,,unsupported_out_of_scope
+HOUT040,"What exercises strengthen wrists for rock climbing?",0,,unsupported_out_of_scope
