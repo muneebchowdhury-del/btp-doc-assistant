@@ -205,47 +205,18 @@ def build_grounded_prompt(question: str, contexts: list[dict[str, Any]]) -> Grou
 
 
 def _extract_response_text(response: Any) -> str:
-    output_text = getattr(
+    text = getattr(
         response,
-        "output_text",
+        "text",
         None
     )
 
-    if output_text:
+    if text:
         return str(
-            output_text
+            text
         ).strip()
 
-    output_items = getattr(
-        response,
-        "output",
-        []
-    )
-    text_parts = []
-
-    for item in output_items:
-        content_items = getattr(
-            item,
-            "content",
-            []
-        )
-
-        for content in content_items:
-            text = getattr(
-                content,
-                "text",
-                None
-            )
-            if text:
-                text_parts.append(
-                    str(
-                        text
-                    )
-                )
-
-    return "\n".join(
-        text_parts
-    ).strip()
+    return ""
 
 
 def _generate_with_gemini(payload: GroundedPromptPayload) -> str:

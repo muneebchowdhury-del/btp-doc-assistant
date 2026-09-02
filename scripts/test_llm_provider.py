@@ -4,6 +4,7 @@ from unittest.mock import patch
 from llm_provider import (
     GEMINI_MODEL,
     LLMProviderCredentialError,
+    _extract_response_text,
     build_grounded_prompt,
     generate_grounded_answer,
     normalize_contexts
@@ -81,6 +82,17 @@ class LLMProviderTests(unittest.TestCase):
                     "What is supported?",
                     self.sample_contexts()
                 )
+
+    def test_extract_response_text_uses_gemini_text_field(self):
+        class GeminiResponse:
+            text = " Grounded answer from Gemini. "
+
+        self.assertEqual(
+            "Grounded answer from Gemini.",
+            _extract_response_text(
+                GeminiResponse()
+            )
+        )
 
     def test_missing_context_field_fails(self):
         with self.assertRaises(ValueError):
