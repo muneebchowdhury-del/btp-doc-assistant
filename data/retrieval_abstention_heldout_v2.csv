@@ -1,0 +1,41 @@
+QUERY_ID,QUESTION,EXPECTED_SUPPORTED,EXPECTED_DOCUMENT_ID,CATEGORY
+HOUT001,Can we run a Python API and a Java service side by side in the SAP BTP Cloud Foundry runtime?,1,DOC001,supported_cloud_foundry_concepts
+HOUT002,Our developers need to pick local tools and deployment descriptors for a new Cloud Foundry project. Which development documentation should they read?,1,DOC002,supported_cloud_foundry_development
+HOUT003,I have built a deployable archive and need to publish it to the SAP BTP Cloud Foundry environment. Which guide covers that flow?,1,DOC003,supported_deployment
+HOUT004,My application needs a managed backing capability such as a database or messaging service. Where is service consumption in Cloud Foundry explained?,1,DOC004,supported_services
+HOUT005,The app has a database service instance but cannot see its credentials at runtime. Which documentation explains attaching that service to the app?,1,DOC005,supported_service_bindings
+HOUT006,Operations wants to update an API URL for a running app without rebuilding its artifact. Which SAP BTP topic covers this configuration approach?,1,DOC006,supported_environment_variables
+HOUT007,The application is deployed but still needs a public hostname mapped to it. Which documentation explains creating that route?,1,DOC007,supported_routes
+HOUT008,We need separate Cloud Foundry areas for product teams inside the same organization. Which documentation explains creating and managing those areas?,1,DOC009,supported_spaces
+HOUT009,A teammate needs deployment rights in one Cloud Foundry space but should not manage the whole org. Which role documentation is relevant?,1,DOC010,supported_roles
+HOUT010,After a failed start command I need to inspect the messages emitted by the application process. Which documentation should I use?,1,DOC011,supported_application_logs
+HOUT011,Compliance wants to review when an app was started stopped or restaged by the platform. Which documentation covers those recorded lifecycle entries?,1,DOC012,supported_application_events
+HOUT012,A pipeline needs credentials for a service instance even though no app will be bound to it. Which SAP BTP documentation explains that artifact?,1,DOC013,supported_service_keys
+HOUT013,One Cloud Foundry space should be limited to fewer routes services and memory than another. Which documentation explains that limit plan?,1,DOC014,supported_space_quotas
+HOUT014,Security wants to control outbound traffic rules for applications in a Cloud Foundry space. Which documentation covers that network policy area?,1,DOC015,supported_security_groups
+HOUT015,Incoming app requests need to be forwarded to another target configured through destinations. Which documentation discusses this route and destination pattern?,1,DOC016,supported_routes_destinations
+HOUT016,A stakeholder asks what SAP BTP is for and which technology capabilities it brings together. Which overview should answer that?,1,DOC017,supported_platform_overview
+HOUT017,I am confused by accounts environments regions entitlements and quotas as core SAP BTP terms. Which concepts page should I start with?,1,DOC018,supported_basic_concepts
+HOUT018,Our tenant design needs to separate enterprise-level administration from deployable subaccount work. Which account structure documentation applies?,1,DOC019,supported_account_model
+HOUT019,A service plan exists commercially but a subaccount cannot consume it yet. Which documentation explains the assignment and quota mechanism?,1,DOC020,supported_entitlements_quotas
+HOUT020,The team is choosing where to host a subaccount for latency and compliance reasons. Which SAP BTP documentation explains location choices?,1,DOC021,supported_regions
+HOUT021,I need to know whether to use cockpit commands CLIs or IDE tools for managing SAP BTP resources. Which page covers tool options?,1,DOC022,supported_tools
+HOUT022,We want to experiment with SAP BTP before paying for a productive setup. Which documentation compares trial access and free tier usage?,1,DOC023,supported_trial_free_tier
+HOUT023,A new developer wants a guided entry point into SAP BTP rather than individual reference pages. Which getting-started documentation is intended for that?,1,DOC024,supported_getting_started
+HOUT024,Our app can call a service through injected binding credentials but another automation needs standalone credentials too. Which service-binding topic is most relevant first?,1,DOC005,supported_service_binding_confusable
+HOUT025,How do I design a SAP Build Apps mobile screen with offline synchronization?,0,,unsupported_near_domain
+HOUT026,Which SAP Integration Suite policy should I use to validate an OAuth token in API Management?,0,,unsupported_near_domain
+HOUT027,How do I define associations and draft enablement in a CAP CDS model?,0,,unsupported_near_domain
+HOUT028,What steps create a calculation view hierarchy in SAP HANA Cloud modeling tools?,0,,unsupported_near_domain
+HOUT029,How do I configure SAP Cloud Connector principal propagation for an on-premise ABAP system?,0,,unsupported_near_domain
+HOUT030,Which SAP Datasphere space type should I choose for a data marketplace scenario?,0,,unsupported_near_domain
+HOUT031,How do I configure SAP Event Mesh dead-letter queues and retry policies?,0,,unsupported_near_domain
+HOUT032,What Kubernetes annotations are needed for a Kyma workload using a service binding secret?,0,,unsupported_near_domain
+HOUT033,How do I choose a training plan for a first half marathon?,0,,unsupported_out_of_scope
+HOUT034,What ingredients do I need for a classic tiramisu dessert?,0,,unsupported_out_of_scope
+HOUT035,How can I troubleshoot a home Wi-Fi router that keeps disconnecting?,0,,unsupported_out_of_scope
+HOUT036,What are the main causes of inflation in macroeconomics?,0,,unsupported_out_of_scope
+HOUT037,How should I prune a young apple tree in spring?,0,,unsupported_out_of_scope
+HOUT038,What is the plot of Pride and Prejudice?,0,,unsupported_out_of_scope
+HOUT039,Which lens is best for street photography at night?,0,,unsupported_out_of_scope
+HOUT040,How do I prepare for a driver's license road test?,0,,unsupported_out_of_scope
