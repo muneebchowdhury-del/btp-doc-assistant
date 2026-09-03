@@ -52,22 +52,72 @@ class LLMProviderTests(unittest.TestCase):
             "What is supported?",
             self.sample_contexts()
         )
+        prompt_text = "\n".join(
+            [
+                payload.system,
+                payload.user
+            ]
+        )
 
         self.assertIn(
             "Use only the supplied retrieved SAP documentation evidence.",
-            payload.system
+            prompt_text
+        )
+        self.assertIn(
+            "semantically equivalent evidence",
+            prompt_text
+        )
+        self.assertIn(
+            "exact wording",
+            prompt_text
+        )
+        self.assertIn(
+            "follows reasonably from the supplied evidence",
+            prompt_text
+        )
+        self.assertIn(
+            "label the inferential part",
+            prompt_text
+        )
+        self.assertIn(
+            "neither stated in nor reasonably supported",
+            prompt_text
         )
         self.assertIn(
             "available documentation is insufficient",
-            payload.user
+            prompt_text
+        )
+        self.assertIn(
+            "core answer",
+            prompt_text
+        )
+        self.assertIn(
+            "additional requested details",
+            prompt_text
+        )
+        self.assertIn(
+            "Cite each SAP source used with its document ID and source URL.",
+            prompt_text
+        )
+        self.assertIn(
+            "Do not invent URLs",
+            prompt_text
+        )
+        self.assertIn(
+            "Answer directly first",
+            prompt_text
+        )
+        self.assertIn(
+            "Do not enumerate unrelated retrieved documents",
+            prompt_text
         )
         self.assertIn(
             "DOC001",
-            payload.user
+            prompt_text
         )
         self.assertIn(
             "https://help.sap.com/docs/example/doc001",
-            payload.user
+            prompt_text
         )
 
     def test_missing_credentials_fail_before_provider_call(self):
