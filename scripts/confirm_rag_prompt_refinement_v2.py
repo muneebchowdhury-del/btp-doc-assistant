@@ -10,7 +10,14 @@ from scripts.rag_generation_outcomes_v2 import classify_provider_answer
 
 PRIMARY_RESULTS_FILE = "data/rag_development_primary_results_v2.csv"
 PROVIDER_REQUEST_SPACING_SECONDS = 15.0
-EXPECTED_PROVIDER_ERROR_IDS = (
+EXPECTED_CONFIRMATION_QUERY_IDS = (
+    "RAGDEV001",
+    "RAGDEV002",
+    "RAGDEV003",
+    "RAGDEV004",
+    "RAGDEV005",
+    "RAGDEV006",
+    "RAGDEV007",
     "RAGDEV008",
     "RAGDEV009",
     "RAGDEV011",
@@ -21,15 +28,15 @@ EXPECTED_PROVIDER_ERROR_IDS = (
     "RAGDEV016",
     "RAGDEV019"
 )
-RETRY_FIELDNAMES = (
+CONFIRMATION_FIELDNAMES = (
     "QUERY_ID",
     "QUESTION",
-    "PRIMARY_OUTCOME",
     "PRIMARY_CONTEXT_DOCUMENT_IDS",
-    "RETRY_OUTCOME",
-    "RETRY_GEMINI_ANSWER_OR_REFUSAL",
-    "RETRY_PROVIDER_ERROR",
-    "RETRY_GENERATION_MS"
+    "CONTEXTS",
+    "CONFIRMATION_OUTCOME",
+    "CONFIRMATION_GEMINI_ANSWER_OR_REFUSAL",
+    "CONFIRMATION_PROVIDER_ERROR",
+    "CONFIRMATION_GENERATION_MS"
 )
 
 
@@ -46,18 +53,6 @@ def read_primary_results(path=PRIMARY_RESULTS_FILE):
         )
 
 
-def select_provider_error_rows(primary_rows):
-    return [
-        row
-        for row in primary_rows
-        if row.get(
-            "OUTCOME",
-            ""
-        ).strip()
-        == "PROVIDER_ERROR"
-    ]
-
-
 def selected_query_ids(rows):
     return tuple(
         row.get(
@@ -68,14 +63,32 @@ def selected_query_ids(rows):
     )
 
 
-def validate_provider_error_selection(rows):
-    actual_ids = selected_query_ids(
+def select_confirmation_rows(primary_rows):
+    return [
+        row
+        for row in primary_rows
+        if row.get(
+            "ACCEPT_DECISION",
+            ""
+        ).strip()
+        == "ACCEPT"
+    ]
+
+
+def validate_unique_query_ids(rows):
+    query_ids = selected_query_ids(
         rows
     )
 
-    if actual_ids != EXPECTED_PROVIDER_ERROR_IDS:
+    if len(
+        query_ids
+    ) != len(
+        set(
+            query_ids
+        )
+    ):
         raise ValueError(
-            "Primary provider-error retry selection does not match the pre-registered query IDs."
+            "Primary confirmation selection contains duplicate QUERY_ID values."
         )
 
 
@@ -121,6 +134,44 @@ def parse_primary_contexts(row):
     return contexts
 
 
+def validate_confirmation_selection(rows):
+    validate_unique_query_ids(
+        rows
+    )
+    actual_ids = selected_query_ids(
+        rows
+    )
+
+    if actual_ids != EXPECTED_CONFIRMATION_QUERY_IDS:
+        raise ValueError(
+            "Prompt-refinement confirmation selection does not match the pre-registered accepted primary query IDs."
+        )
+
+    if "RAGDEV019" not in actual_ids:
+        raise ValueError(
+            "Prompt-refinement confirmation selection must include RAGDEV019."
+        )
+
+    for row in rows:
+        query_id = row.get(
+            "QUERY_ID",
+            ""
+        ).strip()
+        question = row.get(
+            "QUESTION",
+            ""
+        ).strip()
+
+        if not question:
+            raise ValueError(
+                f"Primary QUESTION field is required for {query_id}."
+            )
+
+        parse_primary_contexts(
+            row
+        )
+
+
 def context_document_ids(contexts):
     return ";".join(
         str(
@@ -133,7 +184,7 @@ def context_document_ids(contexts):
     )
 
 
-def retry_primary_row(
+def confirm_primary_row(
     row: dict[str, str],
     answer_provider: Callable[[str, list[dict[str, Any]]], str] = generate_grounded_answer
 ) -> dict[str, Any]:
@@ -172,45 +223,38 @@ def retry_primary_row(
             ""
         ).strip(),
         "QUESTION": question,
-        "PRIMARY_OUTCOME": row.get(
-            "OUTCOME",
-            ""
-        ).strip(),
         "PRIMARY_CONTEXT_DOCUMENT_IDS": context_document_ids(
             contexts
         ),
-        "RETRY_OUTCOME": outcome,
-        "RETRY_GEMINI_ANSWER_OR_REFUSAL": answer,
-        "RETRY_PROVIDER_ERROR": provider_error,
-        "RETRY_GENERATION_MS": generation_ms
+        "CONTEXTS": repr(
+            contexts
+        ),
+        "CONFIRMATION_OUTCOME": outcome,
+        "CONFIRMATION_GEMINI_ANSWER_OR_REFUSAL": answer,
+        "CONFIRMATION_PROVIDER_ERROR": provider_error,
+        "CONFIRMATION_GENERATION_MS": generation_ms
     }
 
 
-def prepare_retry_rows(primary_path=PRIMARY_RESULTS_FILE):
+def prepare_confirmation_rows(primary_path=PRIMARY_RESULTS_FILE):
     primary_rows = read_primary_results(
         primary_path
     )
-    provider_error_rows = select_provider_error_rows(
+    confirmation_rows = select_confirmation_rows(
         primary_rows
     )
-    validate_provider_error_selection(
-        provider_error_rows
+    validate_confirmation_selection(
+        confirmation_rows
     )
-
-    for row in provider_error_rows:
-        parse_primary_contexts(
-            row
-        )
-
-    return provider_error_rows
+    return confirmation_rows
 
 
-def run_retry(
+def run_confirmation(
     primary_path=PRIMARY_RESULTS_FILE,
     answer_provider: Callable[[str, list[dict[str, Any]]], str] = generate_grounded_answer,
     sleep_func: Callable[[float], None] = time.sleep
 ):
-    rows = prepare_retry_rows(
+    rows = prepare_confirmation_rows(
         primary_path
     )
     results = []
@@ -224,7 +268,7 @@ def run_retry(
             )
 
         results.append(
-            retry_primary_row(
+            confirm_primary_row(
                 row,
                 answer_provider=answer_provider
             )
@@ -237,14 +281,14 @@ def format_result_row(result):
     row = dict(
         result
     )
-    row["RETRY_GENERATION_MS"] = f"{float(row['RETRY_GENERATION_MS']):.2f}"
+    row["CONFIRMATION_GENERATION_MS"] = f"{float(row['CONFIRMATION_GENERATION_MS']):.2f}"
     return row
 
 
 def write_results(results, output=sys.stdout):
     writer = csv.DictWriter(
         output,
-        fieldnames=RETRY_FIELDNAMES,
+        fieldnames=CONFIRMATION_FIELDNAMES,
         lineterminator="\n"
     )
     writer.writeheader()
@@ -259,7 +303,7 @@ def write_results(results, output=sys.stdout):
 
 def main():
     write_results(
-        run_retry()
+        run_confirmation()
     )
 
 

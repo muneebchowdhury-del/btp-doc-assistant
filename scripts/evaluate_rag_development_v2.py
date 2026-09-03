@@ -30,6 +30,7 @@ from scripts.evaluate_retrieval_variants_v2 import (  # noqa: E402
     fetch_dense_chunks,
     reciprocal_rank_fusion
 )
+from scripts.rag_generation_outcomes_v2 import classify_provider_answer  # noqa: E402
 
 
 RAG_DEVELOPMENT_FILE = "data/rag_development_v2.csv"
@@ -79,28 +80,6 @@ def should_accept(dense_rank1_score):
         dense_rank1_score is not None
         and dense_rank1_score >= ABSTENTION_DENSE_SCORE_THRESHOLD
     )
-
-
-def classify_provider_answer(answer):
-    normalized = str(
-        answer or ""
-    ).lower()
-
-    refusal_markers = (
-        "available documentation is insufficient",
-        "documentation is insufficient",
-        "supplied evidence is insufficient",
-        "evidence is insufficient",
-        "insufficient evidence"
-    )
-
-    if any(
-        marker in normalized
-        for marker in refusal_markers
-    ):
-        return "LLM_REFUSAL"
-
-    return "GENERATED_ANSWER"
 
 
 def evaluate_question(
