@@ -193,11 +193,13 @@ class RAGProviderErrorRetryTests(unittest.TestCase):
         provider = Mock(
             return_value="Grounded answer."
         )
+        sleep_func = Mock()
 
         try:
             results = retry.run_retry(
                 path,
-                answer_provider=provider
+                answer_provider=provider,
+                sleep_func=sleep_func
             )
         finally:
             os.unlink(
@@ -218,6 +220,160 @@ class RAGProviderErrorRetryTests(unittest.TestCase):
                 results
             )
         )
+        self.assertEqual(
+            8,
+            sleep_func.call_count
+        )
+
+    def test_pacing_sleeps_exactly_between_provider_calls(self):
+        rows = [
+            primary_row(
+                query_id,
+                "PROVIDER_ERROR"
+            )
+            for query_id in retry.EXPECTED_PROVIDER_ERROR_IDS
+        ]
+        path = write_primary_file(
+            rows
+        )
+        events = []
+
+        def provider(question, contexts):
+            events.append(
+                (
+                    "provider",
+                    question
+                )
+            )
+            return "Grounded answer."
+
+        def sleep_func(seconds):
+            events.append(
+                (
+                    "sleep",
+                    seconds
+                )
+            )
+
+        try:
+            retry.run_retry(
+                path,
+                answer_provider=provider,
+                sleep_func=sleep_func
+            )
+        finally:
+            os.unlink(
+                path
+            )
+
+        provider_events = [
+            event
+            for event in events
+            if event[0] == "provider"
+        ]
+        sleep_events = [
+            event
+            for event in events
+            if event[0] == "sleep"
+        ]
+
+        self.assertEqual(
+            9,
+            len(
+                provider_events
+            )
+        )
+        self.assertEqual(
+            8,
+            len(
+                sleep_events
+            )
+        )
+        self.assertTrue(
+            events[0][0] == "provider"
+        )
+        self.assertTrue(
+            events[-1][0] == "provider"
+        )
+        self.assertTrue(
+            all(
+                event
+                == (
+                    "sleep",
+                    retry.PROVIDER_REQUEST_SPACING_SECONDS
+                )
+                for event in sleep_events
+            )
+        )
+
+        for index in range(
+            1,
+            len(
+                events
+            ),
+            2
+        ):
+            self.assertEqual(
+                "sleep",
+                events[index][0]
+            )
+
+    def test_provider_exception_does_not_trigger_retry_and_continues(self):
+        rows = [
+            primary_row(
+                query_id,
+                "PROVIDER_ERROR"
+            )
+            for query_id in retry.EXPECTED_PROVIDER_ERROR_IDS
+        ]
+        path = write_primary_file(
+            rows
+        )
+        calls = []
+
+        def provider(question, contexts):
+            calls.append(
+                question
+            )
+
+            if len(
+                calls
+            ) == 2:
+                raise RuntimeError(
+                    "synthetic quota error"
+                )
+
+            return "Grounded answer."
+
+        try:
+            results = retry.run_retry(
+                path,
+                answer_provider=provider,
+                sleep_func=Mock()
+            )
+        finally:
+            os.unlink(
+                path
+            )
+
+        self.assertEqual(
+            9,
+            len(
+                calls
+            )
+        )
+        self.assertEqual(
+            "PROVIDER_ERROR",
+            results[1]["RETRY_OUTCOME"]
+        )
+        self.assertIn(
+            "synthetic quota error",
+            results[1]["RETRY_PROVIDER_ERROR"]
+        )
+        self.assertEqual(
+            "GENERATED_ANSWER",
+            results[2]["RETRY_OUTCOME"]
+        )
 
     def test_no_retrieval_or_hana_functions_are_invoked(self):
         rows = [
@@ -233,6 +389,7 @@ class RAGProviderErrorRetryTests(unittest.TestCase):
         provider = Mock(
             return_value="Grounded answer."
         )
+        sleep_func = Mock()
 
         try:
             with patch.object(
@@ -274,7 +431,8 @@ class RAGProviderErrorRetryTests(unittest.TestCase):
             ):
                 retry.run_retry(
                     path,
-                    answer_provider=provider
+                    answer_provider=provider,
+                    sleep_func=sleep_func
                 )
         finally:
             os.unlink(
@@ -286,6 +444,10 @@ class RAGProviderErrorRetryTests(unittest.TestCase):
                 retry.EXPECTED_PROVIDER_ERROR_IDS
             ),
             provider.call_count
+        )
+        self.assertEqual(
+            8,
+            sleep_func.call_count
         )
 
     def test_primary_file_is_not_mutated_when_preparing_retry_rows(self):

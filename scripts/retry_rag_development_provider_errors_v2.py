@@ -9,6 +9,7 @@ from scripts.evaluate_rag_development_v2 import classify_provider_answer
 
 
 PRIMARY_RESULTS_FILE = "data/rag_development_primary_results_v2.csv"
+PROVIDER_REQUEST_SPACING_SECONDS = 15.0
 EXPECTED_PROVIDER_ERROR_IDS = (
     "RAGDEV008",
     "RAGDEV009",
@@ -206,17 +207,30 @@ def prepare_retry_rows(primary_path=PRIMARY_RESULTS_FILE):
 
 def run_retry(
     primary_path=PRIMARY_RESULTS_FILE,
-    answer_provider: Callable[[str, list[dict[str, Any]]], str] = generate_grounded_answer
+    answer_provider: Callable[[str, list[dict[str, Any]]], str] = generate_grounded_answer,
+    sleep_func: Callable[[float], None] = time.sleep
 ):
-    return [
-        retry_primary_row(
-            row,
-            answer_provider=answer_provider
+    rows = prepare_retry_rows(
+        primary_path
+    )
+    results = []
+
+    for index, row in enumerate(
+        rows
+    ):
+        if index > 0:
+            sleep_func(
+                PROVIDER_REQUEST_SPACING_SECONDS
+            )
+
+        results.append(
+            retry_primary_row(
+                row,
+                answer_provider=answer_provider
+            )
         )
-        for row in prepare_retry_rows(
-            primary_path
-        )
-    ]
+
+    return results
 
 
 def format_result_row(result):

@@ -27,6 +27,13 @@ Canonical primary outcomes:
 
 Gemini `429 RESOURCE_EXHAUSTED` is treated as provider-capacity or quota behavior and is recorded separately from answer quality.
 
+The primary provider errors reported the Gemini free-tier per-model request quota:
+
+- quota metric: `generativelanguage.googleapis.com/generate_content_free_tier_requests`
+- quota ID: `GenerateRequestsPerMinutePerProjectPerModel-FreeTier`
+- quota value: `5`
+- model: `gemini-3.5-flash`
+
 ## Retry Scope
 
 The secondary harness reads the canonical primary file and selects only rows where:
@@ -84,6 +91,10 @@ The retry must not run:
 ## Execution Policy
 
 Exactly one secondary retry attempt is allowed for each of the nine selected provider-error cases.
+
+Before secondary execution, fixed request pacing was added to stay below the observed 5 requests/minute free-tier provider limit. The retry harness waits `15.0` seconds between provider calls, with no sleep before the first call and no sleep after the final call. The nine selected rows therefore produce exactly eight spacing delays.
+
+This pacing changes execution timing only. It does not change the scientific generation configuration, prompt, model, provider parameters, primary evidence, retrieval evidence, or outcome classification.
 
 No automatic retry loop, backoff loop, fallback model, alternate provider, or prompt variant is allowed.
 
