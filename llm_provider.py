@@ -396,6 +396,11 @@ def _generate_with_groq(payload: GroundedPromptPayload) -> str:
             {
                 "role": "user",
                 "content": payload.user
+                + "\n\nGroq-specific citation-format requirement:\n"
+                + "- For every SAP source cited, include both its document ID and the exact source URL from the retrieved evidence.\n"
+                + "- Use this exact format: [DOCxxx](SOURCE_URL).\n"
+                + "- Do not cite a document ID without its source URL.\n"
+                + "- Before returning the answer, verify that every cited SAP document includes its exact retrieved source URL."
             }
         ],
         reasoning_effort="medium",
