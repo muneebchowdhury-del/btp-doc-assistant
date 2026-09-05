@@ -3,215 +3,477 @@
 
 <head>
     <meta charset="utf-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1"
     >
+
     <title>SAP BTP Documentation Assistant</title>
+
+    <meta
+        name="description"
+        content="Grounded question answering across selected official SAP BTP documentation."
+    >
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='app.css') }}"
     >
+
+    <script
+        src="{{ url_for('static', filename='app.js') }}"
+        defer
+    ></script>
 </head>
 
 <body>
 
-<div class="page">
+<div class="shell">
 
-    <header class="hero">
-        <div class="eyebrow">
-            SAP BTP · Grounded Documentation Assistant
+    <nav class="topbar">
+
+        <a class="brand" href="/">
+            <span class="brand-mark">BTP</span>
+
+            <span class="brand-copy">
+                <strong>Documentation Assistant</strong>
+                <small>Grounded RAG · V2</small>
+            </span>
+        </a>
+
+        <div class="system-state">
+            <span class="state-dot"></span>
+            SAP BTP Cloud Foundry
         </div>
 
-        <h1>
-            Ask SAP BTP documentation
-        </h1>
-
-        <p>
-            Answers are generated only from the selected
-            official SAP BTP documentation indexed by this system.
-        </p>
-    </header>
+    </nav>
 
 
-    <section class="ask-card">
+    <main>
 
-        <form method="POST">
+        <section class="hero">
 
-            <textarea
-                name="question"
-                rows="3"
-                placeholder="Ask a question about SAP BTP..."
-                required
-            >{{ question }}</textarea>
+            <div class="eyebrow">
+                Grounded knowledge retrieval
+            </div>
 
-            <button type="submit">
-                Ask
-            </button>
+            <h1>
+                Ask SAP BTP.
+                <span>Verify the answer.</span>
+            </h1>
 
-        </form>
+            <p class="hero-copy">
+                Ask natural-language questions across the indexed
+                SAP BTP documentation corpus. Answers are generated
+                from retrieved evidence and linked back to the
+                official SAP sources used.
+            </p>
 
-    </section>
+            <div class="trust-row">
 
+                <span class="trust-chip">
+                    Official SAP documentation
+                </span>
 
-    {% if error %}
+                <span class="trust-chip">
+                    SAP HANA Cloud retrieval
+                </span>
 
-        <section class="message error">
-            <strong>Request failed</strong>
-            <p>{{ error }}</p>
+                <span class="trust-chip">
+                    Grounded generation
+                </span>
+
+                <span class="trust-chip">
+                    Source traceability
+                </span>
+
+            </div>
+
         </section>
 
-    {% endif %}
 
+        <section class="ask-card">
 
-    {% if result and not error %}
+            <div class="ask-heading">
 
-        {% if result.OUTCOME == "PIPELINE_ABSTAIN" %}
-
-            <section class="message abstain">
-                <div class="status-label">
-                    Documentation confidence too low
-                </div>
-
-                <h2>
-                    I couldn't answer this confidently
-                    from the indexed SAP BTP documentation.
-                </h2>
-
-                <p>
-                    Try rephrasing the question or consult
-                    the SAP Help Portal for broader documentation.
-                </p>
-            </section>
-
-
-        {% elif result.OUTCOME == "LLM_REFUSAL" %}
-
-            <section class="answer-card">
-
-                <div class="status-label">
-                    Documentation insufficient
-                </div>
-
-                <div class="answer">
-                    {{ answer_html }}
-                </div>
-
-            </section>
-
-
-        {% elif result.OUTCOME == "GENERATED_ANSWER" %}
-
-            <section class="answer-card">
-
-                <div class="status-label success">
-                    Grounded answer
-                </div>
-
-                <div class="answer">
-                    {{ answer_html }}
-                </div>
-
-            </section>
-
-        {% endif %}
-
-
-        {% if sources %}
-
-            <section class="sources">
-
-                <h2>
-                    SAP sources
-                </h2>
-
-                <div class="source-grid">
-
-                    {% for source in sources %}
-
-                        <a
-                            class="source-card"
-                            href="{{ source.source_url }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <span class="doc-id">
-                                {{ source.document_id }}
-                            </span>
-
-                            <strong>
-                                {{ source.title }}
-                            </strong>
-
-                            <span class="open">
-                                Open SAP Help ↗
-                            </span>
-                        </a>
-
-                    {% endfor %}
-
-                </div>
-
-            </section>
-
-        {% endif %}
-
-
-        <details class="technical">
-
-            <summary>
-                Technical details
-            </summary>
-
-            <div>
-                Retrieval:
-                <strong>
-                    {{ result.ACCEPT_DECISION }}
-                </strong>
-            </div>
-
-            <div>
-                Outcome:
-                <strong>
-                    {{ result.OUTCOME }}
-                </strong>
-            </div>
-
-            <div>
-                Retrieval time:
-                {{ "%.0f"|format(result.RETRIEVAL_MS) }} ms
-            </div>
-
-            {% if result.GENERATION_MS %}
                 <div>
-                    Generation time:
-                    {{ "%.0f"|format(result.GENERATION_MS) }} ms
+                    <span class="section-label">
+                        Ask a question
+                    </span>
+
+                    <p>
+                        The assistant answers only when the indexed
+                        documentation provides sufficient evidence.
+                    </p>
                 </div>
+
+            </div>
+
+
+            <form method="POST" id="question-form">
+
+                <textarea
+                    id="question"
+                    name="question"
+                    rows="4"
+                    placeholder="For example: Which SAP BTP environment is based on the Cloud Foundry platform?"
+                    required
+                    autofocus
+                >{{ question }}</textarea>
+
+
+                <div class="form-actions">
+
+                    <span class="keyboard-hint">
+                        Ctrl + Enter to submit
+                    </span>
+
+                    <button
+                        type="submit"
+                        id="submit-button"
+                    >
+                        <span id="submit-label">
+                            Ask documentation
+                        </span>
+
+                        <span aria-hidden="true">
+                            →
+                        </span>
+                    </button>
+
+                </div>
+
+                <div
+                    id="loading-note"
+                    class="loading-note"
+                    aria-live="polite"
+                >
+                    Retrieving evidence and generating a grounded answer…
+                </div>
+
+            </form>
+
+
+            <div class="examples">
+
+                <span>
+                    Try an example:
+                </span>
+
+                <button
+                    type="button"
+                    class="example"
+                    data-prompt="What role does the Cloud Foundry environment play inside SAP BTP?"
+                >
+                    Cloud Foundry
+                </button>
+
+                <button
+                    type="button"
+                    class="example"
+                    data-prompt="How are entitlements and quotas different in SAP BTP?"
+                >
+                    Entitlements
+                </button>
+
+                <button
+                    type="button"
+                    class="example"
+                    data-prompt="What controls outbound network access for applications in a Cloud Foundry space?"
+                >
+                    Security groups
+                </button>
+
+            </div>
+
+        </section>
+
+
+        {% if error %}
+
+            <section class="state-card state-error">
+
+                <div class="state-icon">
+                    !
+                </div>
+
+                <div>
+                    <span class="state-title">
+                        Request failed
+                    </span>
+
+                    <p>
+                        {{ error }}
+                    </p>
+                </div>
+
+            </section>
+
+        {% endif %}
+
+
+        {% if result and not error %}
+
+
+            {% if result.OUTCOME == "PIPELINE_ABSTAIN" %}
+
+                <section class="state-card state-abstain">
+
+                    <div class="state-icon">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <div class="status-label warning">
+                            Insufficient retrieval confidence
+                        </div>
+
+                        <h2>
+                            The indexed documentation does not provide
+                            enough evidence for a reliable answer.
+                        </h2>
+
+                        <p>
+                            Try rephrasing the question or consult the
+                            broader SAP Help Portal documentation.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+            {% elif result.OUTCOME == "LLM_REFUSAL" %}
+
+                <section class="answer-card">
+
+                    <div class="answer-header">
+
+                        <div>
+
+                            <div class="status-label warning">
+                                Documentation insufficient
+                            </div>
+
+                            <h2>
+                                Answer
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="answer">
+                        {{ answer_html }}
+                    </div>
+
+                </section>
+
+
+            {% elif result.OUTCOME == "GENERATED_ANSWER" %}
+
+                <section class="answer-card">
+
+                    <div class="answer-header">
+
+                        <div>
+
+                            <div class="status-label success">
+                                Grounded answer
+                            </div>
+
+                            <h2>
+                                Answer
+                            </h2>
+
+                        </div>
+
+                        <div class="grounding-badge">
+                            Based on retrieved evidence
+                        </div>
+
+                    </div>
+
+
+                    <div class="answer">
+                        {{ answer_html }}
+                    </div>
+
+                </section>
+
             {% endif %}
 
-        </details>
 
-    {% endif %}
+            {% if sources %}
+
+                <section class="sources">
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                Evidence
+                            </span>
+
+                            <h2>
+                                SAP sources used
+                            </h2>
+
+                        </div>
+
+                        <span class="source-count">
+                            {{ sources|length }}
+                            source{% if sources|length != 1 %}s{% endif %}
+                        </span>
+
+                    </div>
+
+
+                    <div class="source-grid">
+
+                        {% for source in sources %}
+
+                            <a
+                                class="source-card"
+                                href="{{ source.source_url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+
+                                <div class="source-top">
+
+                                    <span class="doc-id">
+                                        {{ source.document_id }}
+                                    </span>
+
+                                    <span class="external">
+                                        ↗
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    {{ source.title }}
+                                </strong>
+
+                                <span class="source-domain">
+                                    help.sap.com
+                                </span>
+
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+            {% endif %}
+
+
+            <details class="technical">
+
+                <summary>
+                    System details
+                </summary>
+
+                <div class="technical-grid">
+
+                    <div>
+                        <span>Retrieval decision</span>
+                        <strong>
+                            {{ result.ACCEPT_DECISION }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Outcome</span>
+                        <strong>
+                            {{ result.OUTCOME }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Retrieval</span>
+                        <strong>
+                            {{ "%.0f"|format(result.RETRIEVAL_MS) }} ms
+                        </strong>
+                    </div>
+
+                    {% if result.GENERATION_MS %}
+
+                        <div>
+                            <span>Generation</span>
+                            <strong>
+                                {{ "%.0f"|format(result.GENERATION_MS) }} ms
+                            </strong>
+                        </div>
+
+                    {% endif %}
+
+                    {% if result.LLM_PROVIDER %}
+
+                        <div>
+                            <span>Provider</span>
+                            <strong>
+                                {{ result.LLM_PROVIDER }}
+                            </strong>
+                        </div>
+
+                    {% endif %}
+
+                    {% if result.MODEL %}
+
+                        <div>
+                            <span>Model</span>
+                            <strong>
+                                {{ result.MODEL }}
+                            </strong>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </details>
+
+        {% endif %}
+
+    </main>
 
 
     <footer>
 
-        <span>
-            Technical validation
-        </span>
+        <div>
+            <strong>
+                SAP BTP Documentation Assistant
+            </strong>
 
-        <a href="/db-test">
-            HANA
-        </a>
+            <span>
+                V2 · Hybrid retrieval + grounded generation
+            </span>
+        </div>
 
-        <a href="/embedding-test">
-            Embeddings
-        </a>
 
-        <a href="/table-test">
-            V2 corpus
-        </a>
+        <div class="footer-links">
+
+            <a href="/db-test">
+                HANA connection
+            </a>
+
+            <a href="/embedding-test">
+                Embedding model
+            </a>
+
+            <a href="/table-test">
+                Documentation corpus
+            </a>
+
+        </div>
 
     </footer>
 
