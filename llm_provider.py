@@ -10,6 +10,7 @@ GEMINI_CF_SERVICE_NAME = "gemini-rag-dev"
 GROQ_MODEL = "openai/gpt-oss-120b"
 GROQ_API_KEY_ENV_VAR = "GROQ_API_KEY"
 GROQ_CF_SERVICE_NAME = "groq-rag-dev"
+GROQ_SEED = 42
 VCAP_SERVICES_ENV_VAR = "VCAP_SERVICES"
 
 REQUIRED_CONTEXT_FIELDS = (
@@ -404,7 +405,8 @@ def _generate_with_groq(payload: GroundedPromptPayload) -> str:
             }
         ],
         reasoning_effort="medium",
-        include_reasoning=False
+        include_reasoning=False,
+        seed=GROQ_SEED
     )
 
     return _extract_groq_response_text(
