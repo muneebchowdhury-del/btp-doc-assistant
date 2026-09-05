@@ -1,6 +1,7 @@
-﻿import csv
+import csv
 import os
 import sys
+import time
 
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(
@@ -68,7 +69,7 @@ def main():
 
     results = []
 
-    for item in queries:
+    for index, item in enumerate(queries):
         result = evaluate_question(
             item,
             corpus_chunks,
@@ -78,6 +79,12 @@ def main():
         results.append(
             normalize_final_row(result)
         )
+
+        if (
+            result["GEMINI_CALLED"]
+            and index < len(queries) - 1
+        ):
+            time.sleep(30.0)
 
     fieldnames = list(
         results[0].keys()
