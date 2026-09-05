@@ -1,10 +1,12 @@
 import html
 import json
 import os
+import re
 
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template, render_template_string
 from fastembed import TextEmbedding
 from hdbcli import dbapi
+from markupsafe import Markup
 
 
 app = Flask(__name__)
@@ -162,7 +164,7 @@ def semantic_search(question, top_k=5):
                     "EMBEDDING",
                     TO_REAL_VECTOR(?)
                 ) AS "SCORE"
-            FROM "DOCUMENT_CHUNKS"
+            FROM "DOCUMENT_CHUNKS_V2"
             WHERE "EMBEDDING" IS NOT NULL
             ORDER BY "SCORE" DESC
         """
@@ -203,10 +205,90 @@ def semantic_search(question, top_k=5):
 # Main User Interface
 # ---------------------------------------------------------------------
 
+_CITATION_PATTERN = re.compile(
+    r"\[(DOC\d+)\]\((https://[^)\s]+)\)"
+)
+
+
+def render_answer_html(answer):
+    answer = str(
+        answer or ""
+    )
+
+    rendered = []
+    position = 0
+
+    for match in _CITATION_PATTERN.finditer(
+        answer
+    ):
+        plain_text = answer[
+            position:match.start()
+        ]
+
+        escaped = html.escape(
+            plain_text
+        ).replace(
+            "\n",
+            "<br>"
+        )
+
+        escaped = re.sub(
+            r"\*\*(.+?)\*\*",
+            r"<strong>\1</strong>",
+            escaped
+        )
+
+        rendered.append(
+            escaped
+        )
+
+        document_id = html.escape(
+            match.group(1)
+        )
+        source_url = html.escape(
+            match.group(2),
+            quote=True
+        )
+
+        rendered.append(
+            f'<a href="{source_url}" '
+            f'target="_blank" '
+            f'rel="noopener noreferrer">'
+            f'{document_id}</a>'
+        )
+
+        position = match.end()
+
+    remaining = html.escape(
+        answer[position:]
+    ).replace(
+        "\n",
+        "<br>"
+    )
+
+    remaining = re.sub(
+        r"\*\*(.+?)\*\*",
+        r"<strong>\1</strong>",
+        remaining
+    )
+
+    rendered.append(
+        remaining
+    )
+
+    return Markup(
+        "".join(
+            rendered
+        )
+    )
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     question = ""
-    results = []
+    result = None
+    sources = []
+    answer_html = ""
     error = None
 
     if request.method == "POST":
@@ -217,356 +299,47 @@ def home():
 
         if question:
             try:
-                results = semantic_search(
-                    question,
-                    top_k=5
+                # Lazy import avoids circular imports because the
+                # frozen retrieval evaluator imports shared helpers
+                # from this application module.
+                from rag_pipeline import (
+                    answer_documentation_question
+                )
+
+                result = (
+                    answer_documentation_question(
+                        question
+                    )
+                )
+
+                if result["OUTCOME"] == "PROVIDER_ERROR":
+                    error = result.get(
+                        "PROVIDER_ERROR"
+                    ) or "LLM provider error."
+
+                answer_html = render_answer_html(
+                    result.get(
+                        "ANSWER",
+                        ""
+                    )
+                )
+
+                sources = result.get(
+                    "SOURCES",
+                    []
                 )
 
             except Exception as exc:
-                error = str(exc)
-
-    return render_template_string(
-        """
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-
-    <meta charset="utf-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <title>
-        SAP BTP Documentation Assistant
-    </title>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-            background: #f5f6f7;
-            color: #222;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 50px 25px;
-        }
-
-        .header {
-            margin-bottom: 35px;
-        }
-
-        h1 {
-            margin-bottom: 8px;
-            font-size: 32px;
-        }
-
-        .subtitle {
-            color: #666;
-            font-size: 16px;
-        }
-
-        .search-box {
-            background: white;
-            padding: 22px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            margin-bottom: 30px;
-        }
-
-        form {
-            display: flex;
-            gap: 12px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 15px;
-            border: 1px solid #bbb;
-            border-radius: 7px;
-            font-size: 16px;
-        }
-
-        input[type="text"]:focus {
-            outline: 2px solid #999;
-        }
-
-        button {
-            border: none;
-            border-radius: 7px;
-            padding: 15px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            background: #222;
-            color: white;
-        }
-
-        button:hover {
-            opacity: 0.88;
-        }
-
-        .question {
-            margin-bottom: 20px;
-            color: #555;
-        }
-
-        .result {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 22px;
-            margin-bottom: 18px;
-        }
-
-        .result h3 {
-            margin-top: 0;
-            margin-bottom: 8px;
-        }
-
-        .metadata {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 6px;
-        }
-
-        .score {
-            display: inline-block;
-            margin-top: 4px;
-            margin-bottom: 15px;
-            padding: 5px 9px;
-            background: #f1f1f1;
-            border-radius: 5px;
-            font-size: 13px;
-        }
-
-        .passage {
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-
-        .source a {
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .source a:hover {
-            text-decoration: underline;
-        }
-
-        .error {
-            background: #fff1f1;
-            border: 1px solid #e0aaaa;
-            padding: 15px;
-            border-radius: 7px;
-            margin-bottom: 25px;
-        }
-
-        .empty {
-            background: white;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .technical-links {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            font-size: 13px;
-            color: #777;
-        }
-
-        .technical-links a {
-            margin-right: 15px;
-        }
-
-        @media (max-width: 700px) {
-
-            form {
-                flex-direction: column;
-            }
-
-            button {
-                width: 100%;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-<div class="container">
-
-    <div class="header">
-
-        <h1>
-            SAP BTP Documentation Assistant
-        </h1>
-
-        <div class="subtitle">
-            Semantic search across selected official
-            SAP BTP documentation
-        </div>
-
-    </div>
-
-
-    <div class="search-box">
-
-        <form method="POST">
-
-            <input
-                type="text"
-                name="question"
-                value="{{ question }}"
-                placeholder="Ask a question about SAP BTP..."
-                required
-            >
-
-            <button type="submit">
-                Search
-            </button>
-
-        </form>
-
-    </div>
-
-
-    {% if error %}
-
-        <div class="error">
-            <strong>Search error:</strong>
-            {{ error }}
-        </div>
-
-    {% endif %}
-
-
-    {% if question and not error %}
-
-        <div class="question">
-            Results for:
-            <strong>{{ question }}</strong>
-        </div>
-
-    {% endif %}
-
-
-    {% if results %}
-
-        <h2>
-            Top Semantic Results
-        </h2>
-
-
-        {% for result in results %}
-
-            <div class="result">
-
-                <h3>
-                    {{ loop.index }}.
-                    {{ result.title }}
-                </h3>
-
-
-                <div class="metadata">
-
-                    Topic:
-                    {{ result.topic }}
-
-                    &nbsp;·&nbsp;
-
-                    Document:
-                    {{ result.document_id }}
-
-                </div>
-
-
-                <div class="score">
-
-                    Similarity:
-                    {{ "%.4f"|format(result.score) }}
-
-                </div>
-
-
-                <div class="passage">
-
-                    {{ result.chunk_text }}
-
-                </div>
-
-
-                <div class="source">
-
-                    <a
-                        href="{{ result.source_url }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Open official SAP source ↗
-                    </a>
-
-                </div>
-
-            </div>
-
-        {% endfor %}
-
-
-    {% elif question and not error %}
-
-        <div class="empty">
-            No matching documentation passages were found.
-        </div>
-
-    {% endif %}
-
-
-    <div class="technical-links">
-
-        Technical validation:
-
-        <a href="/db-test">
-            HANA Connection
-        </a>
-
-        <a href="/embedding-test">
-            Embedding Model
-        </a>
-
-        <a href="/table-test">
-            Documentation Table
-        </a>
-
-    </div>
-
-</div>
-
-</body>
-
-</html>
-        """,
+                error = str(
+                    exc
+                )
+
+    return render_template(
+        "index.html",
         question=question,
-        results=results,
+        result=result,
+        answer_html=answer_html,
+        sources=sources,
         error=error
     )
 
@@ -716,7 +489,7 @@ def table_test():
 
         cursor.execute(
             'SELECT COUNT(*) '
-            'FROM "DOCUMENT_CHUNKS"'
+            'FROM "DOCUMENT_CHUNKS_V2"'
         )
 
         row_count = cursor.fetchone()[0]
@@ -725,7 +498,7 @@ def table_test():
         <html>
         <body>
 
-            <h1>DOCUMENT_CHUNKS Accessible</h1>
+            <h1>DOCUMENT_CHUNKS_V2 Accessible</h1>
 
             <p>
                 Rows:
@@ -752,7 +525,7 @@ def table_test():
         <html>
         <body>
 
-            <h1>DOCUMENT_CHUNKS Test Failed</h1>
+            <h1>DOCUMENT_CHUNKS_V2 Test Failed</h1>
 
             <pre>
 {html.escape(str(exc))}

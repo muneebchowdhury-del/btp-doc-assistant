@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+    <title>SAP BTP Documentation Assistant</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='app.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="page">
+
+    <header class="hero">
+        <div class="eyebrow">
+            SAP BTP · Grounded Documentation Assistant
+        </div>
+
+        <h1>
+            Ask SAP BTP documentation
+        </h1>
+
+        <p>
+            Answers are generated only from the selected
+            official SAP BTP documentation indexed by this system.
+        </p>
+    </header>
+
+
+    <section class="ask-card">
+
+        <form method="POST">
+
+            <textarea
+                name="question"
+                rows="3"
+                placeholder="Ask a question about SAP BTP..."
+                required
+            >{{ question }}</textarea>
+
+            <button type="submit">
+                Ask
+            </button>
+
+        </form>
+
+    </section>
+
+
+    {% if error %}
+
+        <section class="message error">
+            <strong>Request failed</strong>
+            <p>{{ error }}</p>
+        </section>
+
+    {% endif %}
+
+
+    {% if result and not error %}
+
+        {% if result.OUTCOME == "PIPELINE_ABSTAIN" %}
+
+            <section class="message abstain">
+                <div class="status-label">
+                    Documentation confidence too low
+                </div>
+
+                <h2>
+                    I couldn't answer this confidently
+                    from the indexed SAP BTP documentation.
+                </h2>
+
+                <p>
+                    Try rephrasing the question or consult
+                    the SAP Help Portal for broader documentation.
+                </p>
+            </section>
+
+
+        {% elif result.OUTCOME == "LLM_REFUSAL" %}
+
+            <section class="answer-card">
+
+                <div class="status-label">
+                    Documentation insufficient
+                </div>
+
+                <div class="answer">
+                    {{ answer_html }}
+                </div>
+
+            </section>
+
+
+        {% elif result.OUTCOME == "GENERATED_ANSWER" %}
+
+            <section class="answer-card">
+
+                <div class="status-label success">
+                    Grounded answer
+                </div>
+
+                <div class="answer">
+                    {{ answer_html }}
+                </div>
+
+            </section>
+
+        {% endif %}
+
+
+        {% if sources %}
+
+            <section class="sources">
+
+                <h2>
+                    SAP sources
+                </h2>
+
+                <div class="source-grid">
+
+                    {% for source in sources %}
+
+                        <a
+                            class="source-card"
+                            href="{{ source.source_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span class="doc-id">
+                                {{ source.document_id }}
+                            </span>
+
+                            <strong>
+                                {{ source.title }}
+                            </strong>
+
+                            <span class="open">
+                                Open SAP Help ↗
+                            </span>
+                        </a>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+        {% endif %}
+
+
+        <details class="technical">
+
+            <summary>
+                Technical details
+            </summary>
+
+            <div>
+                Retrieval:
+                <strong>
+                    {{ result.ACCEPT_DECISION }}
+                </strong>
+            </div>
+
+            <div>
+                Outcome:
+                <strong>
+                    {{ result.OUTCOME }}
+                </strong>
+            </div>
+
+            <div>
+                Retrieval time:
+                {{ "%.0f"|format(result.RETRIEVAL_MS) }} ms
+            </div>
+
+            {% if result.GENERATION_MS %}
+                <div>
+                    Generation time:
+                    {{ "%.0f"|format(result.GENERATION_MS) }} ms
+                </div>
+            {% endif %}
+
+        </details>
+
+    {% endif %}
+
+
+    <footer>
+
+        <span>
+            Technical validation
+        </span>
+
+        <a href="/db-test">
+            HANA
+        </a>
+
+        <a href="/embedding-test">
+            Embeddings
+        </a>
+
+        <a href="/table-test">
+            V2 corpus
+        </a>
+
+    </footer>
+
+</div>
+
+</body>
+</html>
