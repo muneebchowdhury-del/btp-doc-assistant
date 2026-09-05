@@ -7,6 +7,9 @@ from typing import Any
 GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_API_KEY_ENV_VAR = "GEMINI_API_KEY"
 GEMINI_CF_SERVICE_NAME = "gemini-rag-dev"
+GROQ_MODEL = "openai/gpt-oss-120b"
+GROQ_API_KEY_ENV_VAR = "GROQ_API_KEY"
+GROQ_CF_SERVICE_NAME = "groq-rag-dev"
 VCAP_SERVICES_ENV_VAR = "VCAP_SERVICES"
 
 REQUIRED_CONTEXT_FIELDS = (
@@ -231,9 +234,23 @@ def _extract_response_text(response: Any) -> str:
 
 
 def _resolve_gemini_api_key() -> str:
+    return _resolve_api_key(
+        GEMINI_API_KEY_ENV_VAR,
+        GEMINI_CF_SERVICE_NAME
+    )
+
+
+def _resolve_groq_api_key() -> str:
+    return _resolve_api_key(
+        GROQ_API_KEY_ENV_VAR,
+        GROQ_CF_SERVICE_NAME
+    )
+
+
+def _resolve_api_key(env_var_name: str, cf_service_name: str) -> str:
     direct_api_key = str(
         os.getenv(
-            GEMINI_API_KEY_ENV_VAR
+            env_var_name
         )
         or ""
     ).strip()
@@ -276,7 +293,7 @@ def _resolve_gemini_api_key() -> str:
 
                     if service.get(
                         "name"
-                    ) != GEMINI_CF_SERVICE_NAME:
+                    ) != cf_service_name:
                         continue
 
                     credentials = service.get(
@@ -292,7 +309,7 @@ def _resolve_gemini_api_key() -> str:
 
                     service_api_key = str(
                         credentials.get(
-                            GEMINI_API_KEY_ENV_VAR
+                            env_var_name
                         )
                         or ""
                     ).strip()
@@ -301,7 +318,7 @@ def _resolve_gemini_api_key() -> str:
                         return service_api_key
 
     raise LLMProviderCredentialError(
-        f"{GEMINI_API_KEY_ENV_VAR} is not configured; no LLM request was made."
+        f"{env_var_name} is not configured; no LLM request was made."
     )
 
 
@@ -327,6 +344,69 @@ def _generate_with_gemini(payload: GroundedPromptPayload) -> str:
     )
 
 
+def _extract_groq_response_text(response: Any) -> str:
+    choices = getattr(
+        response,
+        "choices",
+        None
+    )
+
+    if not choices:
+        return ""
+
+    message = getattr(
+        choices[0],
+        "message",
+        None
+    )
+
+    if message is None:
+        return ""
+
+    content = getattr(
+        message,
+        "content",
+        None
+    )
+
+    if content:
+        return str(
+            content
+        ).strip()
+
+    return ""
+
+
+def _generate_with_groq(payload: GroundedPromptPayload) -> str:
+    api_key = _resolve_groq_api_key()
+
+    from groq import Groq
+
+    client = Groq(
+        api_key=api_key,
+        max_retries=0
+    )
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": payload.system
+            },
+            {
+                "role": "user",
+                "content": payload.user
+            }
+        ],
+        reasoning_effort="medium",
+        include_reasoning=False
+    )
+
+    return _extract_groq_response_text(
+        response
+    )
+
+
 def generate_grounded_answer(question: str, contexts: list[dict[str, Any]]) -> str:
     payload = build_grounded_prompt(
         question,
@@ -334,6 +414,24 @@ def generate_grounded_answer(question: str, contexts: list[dict[str, Any]]) -> s
     )
 
     answer = _generate_with_gemini(
+        payload
+    )
+
+    if not answer:
+        raise LLMProviderNotConfigured(
+            "The LLM provider returned no text."
+        )
+
+    return answer
+
+
+def generate_grounded_answer_groq(question: str, contexts: list[dict[str, Any]]) -> str:
+    payload = build_grounded_prompt(
+        question,
+        contexts
+    )
+
+    answer = _generate_with_groq(
         payload
     )
 

@@ -5,3 +5,4 @@ fastembed
 requests
 beautifulsoup4
 google-genai
+groq
