@@ -10,8 +10,6 @@ GEMINI_CF_SERVICE_NAME = "gemini-rag-dev"
 GROQ_MODEL = "openai/gpt-oss-120b"
 GROQ_API_KEY_ENV_VAR = "GROQ_API_KEY"
 GROQ_CF_SERVICE_NAME = "groq-rag-dev"
-GROQ_SEED = 42
-GROQ_TEMPERATURE = 0.0
 VCAP_SERVICES_ENV_VAR = "VCAP_SERVICES"
 
 REQUIRED_CONTEXT_FIELDS = (
@@ -403,12 +401,15 @@ def _generate_with_groq(payload: GroundedPromptPayload) -> str:
                 + "- Use this exact format: [DOCxxx](SOURCE_URL).\n"
                 + "- Do not cite a document ID without its source URL.\n"
                 + "- Before returning the answer, verify that every cited SAP document includes its exact retrieved source URL."
+                + "\n\nGroq-specific semantic-support requirement:\n"
+                + "- For questions asking which documentation covers, explains, or is relevant to a concept, evaluate the retrieved document title, stated scope, and described sections semantically.\n"
+                + "- If those elements reasonably support the requested documentation selection, answer and explicitly label the connection as an inference.\n"
+                + "- Do not refuse solely because the exact wording or relationship in the question is not stated verbatim.\n"
+                + "- Refuse only when no retrieved source reasonably supports the requested selection."
             }
         ],
         reasoning_effort="medium",
-        include_reasoning=False,
-        seed=GROQ_SEED,
-        temperature=GROQ_TEMPERATURE
+        include_reasoning=False
     )
 
     return _extract_groq_response_text(
